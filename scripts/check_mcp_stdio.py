@@ -22,12 +22,25 @@ from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parents[1]
 SERVER = ROOT / "tools" / "eeg_mcp_server.py"
+
+# 中文 Windows 的控制台默认是 GBK，打印 ✓ / ✗ 这类字符会直接
+# UnicodeEncodeError 崩掉——而崩掉的位置在工具比对**之后**，于是
+# "检查通过" 与 "检查脚本自己挂了" 看起来一模一样，很难查。
+# 强制切到 UTF-8，output 里的中文与符号才能正常落地。
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        try:
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+        except (ValueError, OSError):
+            pass
 PYTHON = sys.executable
 
 EXPECTED = {
     "eeg_fetch", "eeg_inspect", "eeg_preprocess", "eeg_features",
     "eeg_evaluate", "eeg_validate", "eeg_ablation", "eeg_evidence",
     "eeg_artifacts", "eeg_load_synthetic",
+    # 零信号试验台（一期新增）
+    "eeg_null_twin", "eeg_trial_run", "eeg_defect_rate",
 }
 
 

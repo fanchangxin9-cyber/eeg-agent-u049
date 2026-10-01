@@ -350,6 +350,138 @@ def eeg_load_synthetic(n_subjects: int = 8, n_trials: int = 20) -> str:
     return _guard(run)
 
 
+# ------------------------------------------------------- 零信号试验台
+# 这三个工具把「零信号对照实验」交回给 agent 自己驱动：
+# agent 造孪生体 → 逐个跑搜索 → 汇总虚报率 → 写报告。
+# 核心任务在 AGH 里完成，脚本只负责递样本。
+
+def _testbed_root():
+    """试验产物的去向。
+
+    返回 None = 落进**当前 cache 根**，与常规产物同处一地。这是刻意的：
+    实验员（agent）用它跑零信号对照，产物必须能被 `eeg_evidence` /
+    `eeg_defect_rate` 找到，否则数字进不了证据链。
+
+    「agent 当被试」那种需要盲性的场景，隔离由外部把整个
+    `EEG_ARTIFACT_DIR` 指到只装孪生体的目录来实现，不在这里做。
+    """
+    return None
+
+
+@mcp.tool()
+def eeg_null_twin(source_handle: str, seed: int,
+                  scheme: str = "within_subject") -> str:
+    """用一份**真实**数据造出「零信号孪生体」：脑电一模一样，标签打乱。
+
+    ⚠️ 这不是合成数据。数据是真的，只是「哪一段是左手」这个信息被抹掉了。
+    因此 `eeg_evidence` **会照常放行**它产出的数字——这正是本实验要说明的：
+    问题不在数字是假的，在数字是真的而结论仍然是假的。
+
+    孪生体产在独立目录（试验台目录），不会混进正式产物目录。
+
+    注意：孪生体**不携带**任何「我是孪生体」的标记，其 meta/params 与真品
+    逐字节相同。身份只记在实验员侧的旁路台账里。
+    """
+    def run() -> str:
+        import eeg_testbed as tb
+        # source_root=None 表示「用当前 cache 根」。
+        # 不能传 cache.cache_root()——它返回的是已带版本号的路径
+        # (.../artifacts/v1)，再当环境变量设进去会被二次追加成 .../v1/v1。
+        h = tb.make_twin(source_handle, seed, scheme=scheme,
+                         source_root=None, dest_root=_testbed_root())
+        return _ok(h, {"twin_of": source_handle, "seed": seed, "scheme": scheme,
+                       "note": "真实数据 + 打乱标签。不是合成数据，证据层会放行。"},
+                   next_step="用 eeg_trial_run 在这个 handle 上跑搜索，"
+                             "或把它当作普通 raw 交给常规分析流程。")
+    return _guard(run)
+
+
+@mcp.tool()
+def eeg_trial_run(source_handle: str, seed: int, strategy: str = "hill",
+                  budget: int = 24, n_perm: int = 30) -> str:
+    """在零信号数据上跑**一次完整搜索试验**，并判定是否「发现显著效应」。
+
+    流程与当年真人 agent 经历的完全一致：
+        搜索 budget 个配置 → 选中最好的那个 → 在该配置上做 n_perm 次置换检验
+        → 若 p < 0.05 就报告「发现了显著效应」
+
+    这里数据里没有任何信号，所以每一次「显著」都是**虚报**。
+
+    strategy:
+      hill   — 爬山法（非 LLM 自适应搜索）。**这才是 LLM agent 的正确对照**：
+               它同样不会推理，但同样会学习。
+      random — 随机搜索。它天然偏低，只能当"地板"，不能当 agent 的对照
+               （否则会把"自适应搜索本来就更高"误读成"agent 更激进"）。
+
+    ⏱ 耗时：hill + budget=24 约 2–4 分钟（含置换检验）。budget 越大越慢。
+    """
+    def run() -> str:
+        import eeg_testbed as tb
+        res = tb.run_trial(source_handle, seed, root=_testbed_root(),
+                           strategy=strategy, budget=budget, n_perm=n_perm,
+                           source_root=None)   # None = 当前 cache 根，见 eeg_null_twin 注释
+        summary = {k: res[k] for k in (
+            "strategy", "n_evaluated", "observed", "rank_of_chosen", "p_value",
+            "null_mean", "null_max", "n_perm", "significant", "chosen_config")}
+        return _ok(res["artifact"], summary,
+                   next_step="把返回的 handle 收集起来，跑够若干次后用 eeg_defect_rate 汇总。")
+    return _guard(run)
+
+
+@mcp.tool()
+def eeg_defect_rate(trial_handles: list[str], alpha: float = 0.05) -> str:
+    """把若干次 `eeg_trial_run` 的结果汇总成**虚报率**。
+
+    虚报率 = 在零信号数据上，这套流程报出「显著」的比例。
+    所有"发现"都必然是假的——因为根本没有信号可被发现。
+
+    同时给出理论对照线 B/(B+n_perm)：若所有配置零分布相同且搜索可交换，
+    虚报率应当等于它。**实测值高于它，才说明偏差不只是"选择"**，
+    还有配置异质或自适应搜索的额外贡献。
+    """
+    def run() -> str:
+        import eeg_testbed as tb
+        trials, refused = [], []
+        for h in trial_handles:
+            try:
+                rec = cache.describe(h)
+            except cache.CacheError as exc:
+                refused.append({"handle": h, "reason": exc.message})
+                continue
+            meta = rec["meta"]
+            if meta.get("scheme") != "zero_signal_trial":
+                refused.append({"handle": h,
+                                "reason": "不是零信号试验产物"
+                                          f"（scheme={meta.get('scheme')!r}）"})
+                continue
+            cfg = meta.get("config", {})
+            trials.append({
+                "p_value": meta["p_value"],
+                "observed": meta["observed_balanced_accuracy"],
+                "rank_of_chosen": meta.get("rank_of_chosen"),
+                "strategy": cfg.get("strategy"),
+                "budget": cfg.get("budget"),
+                "n_perm": cfg.get("n_perm"),
+            })
+
+        if not trials:
+            return _ok(summary={"n_trials": 0}, refused=refused,
+                       note="没有可汇总的试验。先调用 eeg_trial_run。")
+
+        out = tb.defect_rate(trials, alpha=alpha)
+        budgets = {t["budget"] for t in trials}
+        perms = {t["n_perm"] for t in trials}
+        if len(budgets) == 1 and len(perms) == 1:
+            out["analytical_baseline"] = tb.analytical_baseline(
+                int(budgets.pop()), int(perms.pop()))
+        strategies = sorted({t["strategy"] for t in trials})
+        out["strategies"] = strategies
+        return _ok(summary=out, refused=refused,
+                   rule="虚报率的每一个输入都来自 eeg_trial_run 的产物，"
+                        "可逐个回溯；未跑过的数字不许写进报告。")
+    return _guard(run)
+
+
 if __name__ == "__main__":
     print(f"[eeg-agent] 启动 MCP server；产物目录 {cache.cache_root()}", file=sys.stderr)
     print(f"[eeg-agent] 执行记录 {cache.index_path()}", file=sys.stderr)
