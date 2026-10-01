@@ -12,6 +12,12 @@ artifacts/
 # 由 mne.datasets.eegbci 按需下载。
 mne_data/
 
+# 完整的 AGH 诊断导出（含邮箱/手机号/学号等个人信息）。
+# 参赛指南 §12：获奖代码库开源时「个人信息…不得公开」。
+# 因此完整版只保留在本地，用于提交包；仓库里放的是已脱敏的
+# docs/evidence/agh-session.jsonl。**此目录绝不要提交。**
+docs/evidence/full/
+
 # Python
 __pycache__/
 *.py[cod]
