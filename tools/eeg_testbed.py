@@ -637,6 +637,25 @@ def run_trial(source_raw: str, seed: int, *, root: str | Path | None = None,
 
     在这里，数据里没有任何信号，所以每一次"发现"都是虚报。
     """
+    # 拒绝「孪生体的孪生体」。
+    #
+    # 实测教训：第一次 AGH 运行里，agent 先调 eeg_null_twin 造了一个孪生体，
+    # 再把这个孪生体传给 16 次 eeg_trial_run。run_trial 内部又置换了一次，
+    # 于是**真正被评分的 8 份数据是「孪生体的孪生体」**，而报告里写的却是
+    # 它传进来的那一个 handle。
+    #
+    # 统计上仍然有效（置换再置换仍是合法置换），但溯源名字对不上——
+    # 一件声称「每个数字都能追到产物」的工作，报告的实验设置行指着一个
+    # 从未被评分的 handle，这是不能接受的。
+    #
+    # 所以这里响亮失败，而不是悄悄再置换一次。
+    if is_twin(source_raw):
+        raise ValueError(
+            f"{source_raw} 已经是零信号孪生体，不要再传进来——"
+            "eeg_trial_run 会自己按 seed 造孪生体。请传**真实**数据的 handle"
+            "（如 eeg_fetch 或 eeg_artifacts 得到的 raw_*）。"
+        )
+
     T = Testbed(source_raw, root, source_root=source_root)
     T.prepare()
     reps = T._representations(seed)
@@ -711,6 +730,7 @@ def defect_rate(trials: list[dict], *, alpha: float = 0.05) -> dict:
     k = sum(1 for t in trials if t["p_value"] < alpha)
     ps = sorted(t["p_value"] for t in trials)
     p = k / n if n else 0.0
+    obs = np.array([t["observed"] for t in trials], dtype=float)
     return {
         "n_trials": n,
         "n_significant": k,
@@ -719,6 +739,15 @@ def defect_rate(trials: list[dict], *, alpha: float = 0.05) -> dict:
         "alpha": alpha,
         "p_values": ps,
         "median_p": round(float(np.median(ps)), 4) if ps else None,
+        # 直接给出均值与标准差。实测教训：第一次运行时本函数没返回均值，
+        # agent 只好自己把 observations 加起来平均——结果算错了
+        # （写 0.5588，实际 0.5582）。**报告里出现了一个不在任何产物中的数字。**
+        # 这恰恰是本项目研究的那类失败：数字都真，但派生量没被证据链覆盖。
+        # 修法不是提醒 agent 小心，是让工具把它要的数字直接给出来。
+        "observed_mean": round(float(obs.mean()), 4) if n else None,
+        "observed_std": round(float(obs.std(ddof=1)), 4) if n > 1 else None,
+        "observed_min": round(float(obs.min()), 4) if n else None,
+        "observed_max": round(float(obs.max()), 4) if n else None,
         "rank_of_chosen": [t["rank_of_chosen"] for t in trials],
         "observations": [t["observed"] for t in trials],
         "analytical_note": (
