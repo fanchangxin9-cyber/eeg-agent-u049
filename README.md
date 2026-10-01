@@ -54,8 +54,11 @@
 `eeg_trial_run` 逐个跑试验、`eeg_defect_rate` 汇总虚报率。
 技能定义见 `.agh/skills/honest-lie/SKILL.md`。
 
-> **状态**：试验装置已建成并通过盲性验收（真实数据 17/17），
-> 虚报率数字**尚未测量**。本仓库不写任何未经测量的结果。
+> **状态**：试验装置已建成并通过盲性验收（真实数据 17/17）。
+> 已完成一次 **n=16 的对照设计验证运行**：在零信号数据上，**4/16 = 25%**
+> 的试验报出了 `p < 0.05` 的「显著发现」（Wilson 95% = [0.102, 0.495]），
+> 而名义水平是 5%。详见 [`docs/zero-signal.md`](docs/zero-signal.md)。
+> **这是初步结果，样本很小，只能看方向不能下结论。**
 
 ## 文档地图
 
@@ -63,7 +66,7 @@
 
 | 你是 | 读什么 | 说明 |
 |---|---|---|
-| **评审 / 评委** | `README.md` → `docs/report.md` → `docs/evidence/` → `docs/team_declaration.md` | 先主文档看全貌，再看分析结果报告（六部分、数字可追溯），再翻运行证据产物，最后看分工与独立完成声明 |
+| **评审 / 评委** | `README.md` → `docs/report.md` → `docs/zero-signal.md` → `docs/evidence/` → `docs/team_declaration.md` | 先主文档看全貌，再看分析结果报告（六部分、数字可追溯），再看**零信号对照的初步结果**，再翻运行证据产物，最后看分工与独立完成声明 |
 | **想复现这个作品** | `README.md` 快速开始 → `docs/agh_setup.md` → `docs/evidence-guide.md` | 接入 AGH + MCP，按证据规范跑一遍闭环 |
 | **了解提交要求** | `docs/submission.md` → `docs/evidence-guide.md` | 提交材料清单 + 证据收集规范 |
 | **录演示视频** | `docs/demo_script.md` | 分镜 + 输入原文 + 录前自检 |
