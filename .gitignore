@@ -1,0 +1,27 @@
+# 密钥：绝对不能提交
+.env
+*.key
+*.pem
+
+# 产物缓存。默认落在仓库之外（%LOCALAPPDATA%\eeg-agent），
+# 但允许用 EEG_ARTIFACT_DIR 覆盖到仓库内，所以一并忽略。
+.cache/
+artifacts/
+
+# EEGMMIDB 原始数据（约 6–7 MB/被试）。不重新分发，
+# 由 mne.datasets.eegbci 按需下载。
+mne_data/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
