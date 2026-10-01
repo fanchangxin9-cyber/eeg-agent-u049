@@ -116,7 +116,7 @@ docs/evidence/full/          ← 已被 .gitignore 排除，不进仓库
 .venv/Scripts/python.exe tools/eeg_mcp_server.py
 ```
 
-在 AGH 里逐个调用 9 个工具，确认 handle 传递与错误分支。
+在 AGH 里逐个调用 13 个工具，确认 handle 传递与错误分支。
 
 ### 第 4 层 · AGH 端到端闭环
 

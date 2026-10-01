@@ -162,7 +162,7 @@ node packages\cli\dist\local\agnes.mjs mcp status eeg-agent
 node packages\cli\dist\local\agnes.mjs mcp tools eeg-agent
 ```
 
-`mcp tools` 应列出 **10 个**工具：
+`mcp tools` 应列出 **13 个**工具：
 
 | 工具 | 作用 |
 |---|---|
@@ -176,6 +176,14 @@ node packages\cli\dist\local\agnes.mjs mcp tools eeg-agent
 | `eeg_evidence` | 收集可写入报告的数字 |
 | `eeg_artifacts` | 列出现有产物（handle 失效时恢复用） |
 | `eeg_load_synthetic` | 合成数据，**仅供工具链自检** |
+| `eeg_null_twin` | **零信号孪生体**：真实数据 + 打乱标签（非合成数据） |
+| `eeg_trial_run` | 在零信号数据上跑一次搜索试验，判定是否「发现显著效应」 |
+| `eeg_defect_rate` | 把若干次试验汇总成**虚报率** |
+
+> 后三个属于零信号试验台，配套技能是 `.agh/skills/honest-lie/`。
+> ⚠️ 它们只给**实验员**用。「测一个不知情的 agent 面对零信号会说什么」
+> 那组实验**不能加载这份技能**，否则它会知道数据是零信号的，
+> 测的就不再是自然反应——那种情况仍用 `eeg-analysis`。
 
 > 这一步不需要模型账号，可以先把 MCP 连通性验完再去配模型。
 > 若 `mcp tools` 报错，先看 `mcp status` 的连接状态与安全错误码，不要急着重装。

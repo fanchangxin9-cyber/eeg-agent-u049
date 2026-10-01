@@ -22,6 +22,41 @@
 | 使用环节 | 任务规划与决策、数据质量诊断解读、预处理配置选择、报告生成与证据绑定 |
 | 调用方式 | 通过 Agnes Harness 内置对话调用；MCP 工具只做本地信号处理，不调用任何模型接口 |
 
+## 这个项目现在要回答什么
+
+> ### 「诚实的谎言」The Honest Lie
+> ### 它从噪声里找到了规律。而且它一句假话都没说。
+
+上面那套分析流程有一个不寻常的性质：**它在结构上无法编造数字**。
+`eeg_evidence` 拒绝合成数据、拒绝不存在的 handle，报告里每个数字都能
+落到磁盘上一个产物文件。
+
+**但它仍然产出了可疑的结论。**
+
+同一份 270 段数据上跑过 **67 次**真实评估，报告采用了其中第 10 名，
+并称 `p = 0.0323` 显著。按 67 次配置做统计校正后 `p` 仍 = 0.0167 < 0.05
+—— **事后校正救不了它**，因为校正前提（各配置零分布相同）不成立，
+而且搜索不是随机抽样，是**看着反馈一路朝高分方向自适应调的**。
+
+**只能做实验测出来。**
+
+于是有了**零信号试验台**：取真实脑电，在被试内打乱标签。脑电一个采样点
+都没动，只是「哪一段是左手」被抹掉了。它**不是合成数据**，所以审计层照常
+放行它产出的数字 —— 这正是要点：**问题不在数字是假的，在数字全是真的
+而结论仍然是假的。**
+
+要测的是**虚报率**：在完全没有信号的数据上，这套流程报出「显著」的比例。
+对照必须用**非 LLM 的自适应搜索**（爬山法），而不是随机搜索 —— 随机搜索
+的分数天然偏低，拿它当对照会把「自适应搜索本来就更高」误读成
+「agent 更激进」。
+
+**核心任务由 AGH 里的 agent 完成**：它调 `eeg_null_twin` 造孪生体、
+`eeg_trial_run` 逐个跑试验、`eeg_defect_rate` 汇总虚报率。
+技能定义见 `.agh/skills/honest-lie/SKILL.md`。
+
+> **状态**：试验装置已建成并通过盲性验收（真实数据 17/17），
+> 虚报率数字**尚未测量**。本仓库不写任何未经测量的结果。
+
 ## 文档地图
 
 > 按**读者**组织，先找到你是哪类读者，再读对应路径。
@@ -215,20 +250,48 @@ python -m venv .venv
 > （`update_path=False` 时 MNE 不会替你建目录，会直接报
 > "Download location ... does not exist"）。
 
+### 6. 在 AGH 里跑零信号对照实验
+
+这是本项目的**核心任务**，由 AGH 里的 agent 完成。
+
+**跑之前**：盲性必须验过（这是实验有效性闸门，不通过则全部数字作废）：
+
+```bash
+.venv/Scripts/python.exe scripts/check_blinding.py
+```
+
+在 Skills 页刷新、审核并启用 **`honest-lie`**，然后在会话里点名，例如：
+
+> 点名 honest-lie 技能，运行零信号对照实验。
+> 先建真实基线，然后跑 N 次试验（strategy=hill, budget=24, n_perm=30），
+> 用 eeg_defect_rate 汇总虚报率，每个数字讲清来源。
+
+> ⚠️ **`honest-lie` 只给实验员用。** 如果要测「一个不知情的 agent 面对零信号
+> 会说什么」，**绝不能给它加载这份技能**——它会知道数据是零信号的，测的就不再
+> 是自然反应。那种情况仍用 `eeg-analysis`。
+
+> ⏱ **耗时**：`eeg_trial_run` 一次 2–4 分钟。N=20 约 40–80 分钟，
+> N=100 要 3–7 小时。N=20–30 对「虚报率远高于 5%」这个结论已足够。
+
 ## 目录结构
 
 ```
 eeg-agent/
 ├── README.md
 ├── requirements.txt
-├── .agh/skills/eeg-analysis/
-│   └── SKILL.md                # AGH Skill 定义（任务方法）
+├── .agh/skills/
+│   ├── eeg-analysis/
+│   │   └── SKILL.md            # 常规分析任务的方法（也用于「agent 当被试」场景）
+│   └── honest-lie/
+│       └── SKILL.md            # 零信号对照实验的方法（只给实验员用）
 ├── tools/
-│   ├── eeg_mcp_server.py       # MCP server 入口（10 个工具）
+│   ├── eeg_mcp_server.py       # MCP server 入口（13 个工具）
+│   ├── eeg_testbed.py          # 零信号试验台（孪生体、搜索、虚报率）
 │   ├── eeg_pipeline.py         # 分析原子能力
 │   ├── eeg_dataset.py          # EEGMMIDB 加载与事件切分
 │   └── eeg_cache.py            # 产物存储（recipe 寻址 + 执行记录）
 ├── scripts/
+│   ├── check_blinding.py       # 盲性验收（实验有效性闸门）
 │   ├── check_mcp_stdio.py      # MCP stdio 连通性自检
 │   ├── export_session.py       # 导出 AGH 会话
 │   ├── summarize_session.py    # 汇总会话
@@ -236,7 +299,8 @@ eeg-agent/
 ├── tests/
 │   ├── test_normal.py          # 正常样例
 │   ├── test_edge.py            # 边界样例
-│   └── test_failure.py         # 失败样例
+│   ├── test_failure.py         # 失败样例
+│   └── test_testbed.py         # 零信号试验台（含盲性回归测试）
 ├── docs/
 │   ├── agh_setup.md            # AGH 接入配置
 │   ├── demo_script.md          # 演示视频分镜
