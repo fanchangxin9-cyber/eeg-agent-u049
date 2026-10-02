@@ -57,6 +57,13 @@ _PII = (
     ("phone", re.compile(r"(?<!\d)1[3-9]\d{9}(?!\d)")),
     ("id", re.compile(r"(?<!\d)\d{17}[\dXx](?!\d)")),
 )
+# Agnes 账号标识：事件信封的 `route`/`accountId` 里带 `account-acct-<uuid>`
+# 或裸 `acct-<uuid>`。它是账号级标识，不应随公开仓库外流。
+# 先替换带前缀的整串，再替换裸串——前者替换后不再含 uuid，不会二次命中。
+_ACCOUNT = (
+    re.compile(r"account-acct-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
+    re.compile(r"(?<![0-9A-Za-z-])acct-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"),
+)
 _SECRET_JSON = re.compile(r'("secret://[^"\s]+"\s*:\s*")([^"]+)(")')
 _SECRET_ASSIGNED = re.compile(r"(secret://[^\s\"'=:]+=)(\"[^\"]+\"|'[^']+'|[^\s,;}]+)")
 
@@ -91,6 +98,8 @@ def _redact_string(s: str, home: str | None) -> str:
     out = _SECRET_ASSIGNED.sub(lambda m: f"{m.group(1)}[REDACTED:secret]", out)
     for kind, pat in _SIMPLE_SECRETS:
         out = pat.sub(f"[REDACTED:{kind}]", out)
+    for pat in _ACCOUNT:
+        out = pat.sub("[REDACTED:account]", out)
 
     if home:
         pat = _path_pattern(home)

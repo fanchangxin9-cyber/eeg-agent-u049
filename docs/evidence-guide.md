@@ -17,8 +17,13 @@
 | 3 | 正常样例 | `pytest tests/test_normal.py` | `evidence/tests-normal.txt` |
 | 4 | 边界样例 | `pytest tests/test_edge.py` | `evidence/tests-edge.txt` |
 | 5 | 失败样例 | `pytest tests/test_failure.py` | `evidence/tests-failure.txt` |
-| 6 | 三类样例汇总 | `pytest tests/` | `evidence/tests-all.txt` |
+| 6 | 全部测试汇总（三类样例 + 盲性回归） | `pytest tests/` | `evidence/tests-all.txt` |
 | 7 | 机器可读执行日志 | 工具自动写入 | `index.jsonl`（见 §三） |
+
+> **整次运行的台账另存于 `run-YYYYMMDD/` 子目录**，与人机分工无关，两者都保留：
+> - `evidence/run-20261002/` — 三幕**人工权威运行**（AGH Web UI + 录屏）的台账与数字汇总。
+>
+> 各子目录内的 `README.md` 记运行信息、时间线、异常与诊断；`summary.md` 记结果数字。
 
 ### 关于脱敏（如实说明）
 
@@ -31,6 +36,7 @@
 | 本机用户名 | `<user>` | 个人身份标识 |
 | 学号 | `<redacted>` | 指南 §12：个人信息不得公开 |
 | 密钥 / 邮箱 / 手机号 | `[REDACTED:*]` | AGH 原生导出规则 |
+| Agnes 账号标识（`account-acct-<uuid>` / `acct-<uuid>`） | `[REDACTED:account]` | 事件信封 `route`/`accountId` 里的账号级标识，不应公开 |
 
 脱敏由 `scripts/export_session.py` 执行，规则写在代码里、可复核；
 额外词条（如学号）通过环境变量 `AGH_EXPORT_REDACT_EXTRA` 传入，
@@ -41,14 +47,16 @@
 ### 完整版放在哪
 
 完整的 AGH 诊断导出（`index.html` / `events.jsonl` / `trace.json` / `logs/`，
-含邮箱、手机号、学号等个人信息）放在：
+含邮箱、手机号、学号等个人信息）**存放在仓库之外**，不进仓库：
 
 ```
-docs/evidence/full/          ← 已被 .gitignore 排除，不进仓库
+d:\暂存\agh-diagnostics-10c4cbf7-20261002-154248\   ← 三幕权威运行（run-20261002）完整包
+docs/evidence/full/                                  ← 更早一次导出的完整快照（已被 .gitignore 排除）
 ```
 
 **用途**：随提交包（ZIP）交给评委核验。参赛指南 §12 规定获奖代码库开源时
 「个人信息…不得公开」，所以它只存在于本地和提交包中，**永远不要 `git add`**。
+（其中 `system.json` 的账号标识已按上表脱敏为 `[REDACTED:account]`。）
 
 仓库里公开的是已脱敏的 `docs/evidence/agh-session.jsonl` 与
 `docs/evidence/agh-session-trace.md`，两者的工具调用序列完全一致。
@@ -94,7 +102,7 @@ docs/evidence/full/          ← 已被 .gitignore 排除，不进仓库
 | 采样率 | 160 Hz |
 | 加载窗口 | `[-0.2, 4.0]` 秒 → 673 个采样点 |
 | 单被试样本数 | 45（runs 4/8/12 各 15 次，T1/T2 各半） |
-| 幅值量级 | 中位数约 32 µV，p99 约 161 µV |
+| 幅值量级 | 中位数约 22 µV，p99 约 167 µV（被试 1–6，`eeg_inspect` → `raw_057280305171`） |
 | 单被试下载量 / 耗时 | 约 7.5 MB / 约 11 分钟 |
 | 特征维度（bandpower+asymmetry, mu+beta） | 170 = 64×2 + 21 对同源电极×2 |
 

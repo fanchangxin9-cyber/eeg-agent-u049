@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>零信号实验 · 交互审计页（run-20261002）</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#14181f; --muted:#5c6674;
+    --line:#e2e6ea; --line2:#eef1f4;
+    --teal:#0f766e; --teal-soft:#e6f2f0;
+    --amber:#b45309; --amber-soft:#fbf1e3;
+    --red:#b91c1c; --red-soft:#fbeaea;
+    --green:#15803d; --violet:#6d28d9;
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Mono","Consolas",monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+       font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  a{color:var(--teal);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px 90px}
+
+  header.top{background:linear-gradient(160deg,#0f2b2a 0%,#123a37 55%,#14413c 100%);
+    color:#eef7f5;padding:38px 0 30px;margin-bottom:26px}
+  header.top .wrap{padding-bottom:0}
+  .eyebrow{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:#8fd3c9;font-weight:600;margin:0 0 10px}
+  header.top h1{margin:0 0 8px;font-size:29px;line-height:1.25;letter-spacing:-.01em}
+  header.top p.lede{margin:0;color:#c6ded9;max-width:760px;font-size:14.5px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+    color:#dcf0ec;border-radius:999px;padding:4px 12px;font-size:12.5px;
+    display:inline-flex;align-items:center;gap:6px}
+  .chip b{color:#fff;font-weight:600}
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:#4ade80;display:inline-block}
+
+  nav.sticky{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid var(--line);
+    margin-bottom:24px}
+  nav.sticky .wrap{padding:0 22px;display:flex;gap:4px;overflow-x:auto}
+  nav.sticky a{color:var(--muted);font-size:13.5px;padding:13px 12px;white-space:nowrap;
+    border-bottom:2px solid transparent;font-weight:500}
+  nav.sticky a:hover{color:var(--ink);text-decoration:none}
+  nav.sticky a.active{color:var(--teal);border-bottom-color:var(--teal)}
+
+  section{margin:0 0 34px;scroll-margin-top:60px}
+  h2{font-size:19px;margin:0 0 4px;letter-spacing:-.01em}
+  h2 .n{color:var(--teal);font-family:var(--mono);font-size:15px;margin-right:8px}
+  .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:20px 22px;box-shadow:0 1px 2px rgba(20,24,31,.03)}
+  .card + .card{margin-top:14px}
+
+  .callout{border-left:3px solid var(--teal);background:var(--teal-soft);
+    border-radius:0 10px 10px 0;padding:14px 18px;font-size:13.5px;color:#0d3f3a}
+  .callout.warn{border-left-color:var(--amber);background:var(--amber-soft);color:#5c3708}
+  .callout.danger{border-left-color:var(--red);background:var(--red-soft);color:#601414}
+  .callout b{font-weight:700}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line2);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12.5px;letter-spacing:.02em;
+     background:#fafbfc;position:sticky;top:0}
+  tbody tr:hover{background:#fafbfc}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .mono{font-family:var(--mono);font-size:12.5px}
+  .handle{font-family:var(--mono);font-size:12px;background:#f2f5f7;border:1px solid var(--line);
+    border-radius:5px;padding:1px 6px;color:#31424f;white-space:nowrap}
+  .tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;
+    border:1px solid var(--line);color:var(--muted);background:#fafbfc}
+  .tag.ok{color:var(--green);border-color:#bfe3c8;background:#eefaf1}
+  .tag.no{color:var(--red);border-color:#f0c9c9;background:#fdf0f0}
+  .tag.hi{color:var(--amber);border-color:#ecd3ab;background:#fdf6ea}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+
+  /* chart */
+  .chartwrap{position:relative}
+  .chartwrap svg{width:100%;height:auto;display:block}
+  .tooltip{position:absolute;pointer-events:none;background:#14181f;color:#fff;
+    border-radius:8px;padding:8px 11px;font-size:12.5px;line-height:1.5;
+    box-shadow:0 6px 20px rgba(0,0,0,.22);opacity:0;transition:opacity .12s;z-index:20;
+    white-space:nowrap}
+  .tooltip .k{color:#9fb1bd}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:20px;height:0;border-top-width:2px;
+    border-top-style:solid;vertical-align:middle;margin-right:7px}
+  .legend .dotmark{display:inline-block;width:9px;height:9px;border-radius:50%;
+    vertical-align:middle;margin-right:7px;border:2px solid}
+
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+  .controls input[type=search]{flex:1;min-width:180px;padding:8px 12px;border:1px solid var(--line);
+    border-radius:8px;font-family:var(--sans);font-size:13.5px;background:#fff}
+  .controls input[type=search]:focus{outline:2px solid var(--teal-soft);border-color:var(--teal)}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+  .seg button{border:0;background:transparent;padding:8px 13px;font-size:13px;color:var(--muted);
+    cursor:pointer;font-family:var(--sans);border-right:1px solid var(--line)}
+  .seg button:last-child{border-right:0}
+  .seg button.on{background:var(--teal);color:#fff}
+  .count{font-size:12.5px;color:var(--muted);margin-left:auto}
+
+  .scroll{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  .scroll thead th{position:sticky;top:0;z-index:2}
+
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:13.5px}
+  .kv dt{color:var(--muted)}
+  .kv dd{margin:0}
+
+  .drift{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:760px){.drift{grid-template-columns:1fr}}
+  .drift .card{border-top:3px solid var(--line)}
+  .drift .card.old{border-top-color:var(--amber)}
+  .drift .card.new{border-top-color:var(--teal)}
+  .drift h3{margin:0 0 12px;font-size:14.5px}
+  .drift .big{font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+  footer{border-top:1px solid var(--line);margin-top:34px;padding-top:20px;
+    color:var(--muted);font-size:12.5px}
+  footer code{font-family:var(--mono);background:#f2f5f7;padding:1px 5px;border-radius:4px}
+  .no-fab{color:var(--red);font-weight:600}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">EEG Agent · 第三幕 · 流程审计</p>
+    <h1>零信号实验 · 交互审计页</h1>
+    <p class="lede">把三幕权威运行（run-20261002）的每一个数字固定到它的 <span class="mono">eval_*</span> 产物上。
+      页面内所有数值均取自运行台账与汇总文件，逐档可核查；未测量的项一律标注「未测量」。</p>
+    <div class="chips">
+      <span class="chip"><span class="dot"></span>运行日期 <b>2026-10-02</b></span>
+      <span class="chip">路线 <b>复现</b></span>
+      <span class="chip">MCP 工具 <b>13</b></span>
+      <span class="chip">盲性验收 <b>17/17</b></span>
+      <span class="chip">pytest <b>56 passed</b></span>
+      <span class="chip">会话 <b class="mono">10c4cbf7…e65dea</b></span>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky" id="nav">
+  <div class="wrap">
+    <a href="#overview">概览</a>
+    <a href="#curve">预算曲线</a>
+    <a href="#detail">逐档明细</a>
+    <a href="#artifacts">产物清单</a>
+    <a href="#repro">复现判定</a>
+    <a href="#drift">两次漂移</a>
+    <a href="#anomaly">异常与超时</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <section id="overview">
+    <h2><span class="n">00</span>这份页面回答什么</h2>
+    <p class="sub">一句话：在<strong>完全没有信号</strong>的数据上，这套「不会撒谎」的流程会报出多少次「显著」？</p>
+    <div class="callout">
+      <b>要审的是流程，不是 agent。</b>「从一堆配置里挑最好的再报数」这个动作本身，
+      在零信号数据上会把虚报率从名义 <b>0.05</b> 抬到 <b>0.525</b>（budget=24，40 次里 21 次报「显著」）。
+      偏差主要来自「挑」这个动作，而非「会推理的智能体」——纯随机抽样同样能到 0.55。
+    </div>
+    <div class="card" style="margin-top:14px">
+      <dl class="kv">
+        <dt>数据源</dt><dd><span class="handle">raw_057280305171</span>　EEGMMIDB v1.0.0，被试 1–6，runs 4/8/12，270 段，真实数据</dd>
+        <dt>零信号孪生体</dt><dd>真实脑电不动一个采样点，仅在<strong>每个被试内部打乱标签</strong>；不是合成数据，故 <span class="mono">eeg_evidence</span> 照常放行</dd>
+        <dt>单次试验</dt><dd>在一个孪生体上搜 budget 个配置 → 取分数最高者 → 该配置上做 30 次置换检验 → <span class="mono">p &lt; 0.05</span> 记「显著」</dd>
+        <dt>对照</dt><dd><span class="mono">hill</span>（机械自适应爬山）与 <span class="mono">random</span>（纯抽样），同 seed 配对比对</dd>
+        <dt>数字出处</dt><dd><code>docs/evidence/run-20261002/summary.md</code>（P4 由 agent 写）与 <code>docs/evidence/run-20261002/README.md</code>（运行台账）</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section id="curve">
+    <h2><span class="n">01</span>预算曲线：虚报率随搜索规模上升</h2>
+    <p class="sub">横轴为搜索规模 budget（对数刻度），纵轴为虚报率。虚线为理论对照线 <span class="mono">B/(B+n_perm)</span>。悬停查看精确值与 Wilson 区间。</p>
+    <div class="card">
+      <div class="chartwrap" id="chartwrap">
+        <svg id="chart" viewBox="0 0 780 400" role="img" aria-label="预算曲线"></svg>
+        <div class="tooltip" id="tip"></div>
+      </div>
+      <div class="legend">
+        <span><i style="border-color:#0f766e"></i>实测（合并）</span>
+        <span><i style="border-color:#b45309;border-top-style:dashed"></i>理论对照线 B/(B+n_perm)</span>
+        <span><i style="border-color:#b91c1c;border-top-style:dashed"></i>名义水平 0.05</span>
+        <span><span class="dotmark" style="border-color:#6d28d9"></span>budget=24 · 单臂（hill / random）</span>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px">
+      三档实测值均<strong>高于</strong>各自对照线（绝对超出 +0.068 / +0.082 / +0.081，不随规模收敛）——
+      除「取 B 次最大值」外，还有配置异质或自适应搜索的额外贡献。
+      注：这是<strong>点估计</strong>上的偏高；三档 Wilson 区间各自都包含其对照线，故尚未达统计显著。
+    </div>
+  </section>
+
+  <section id="detail">
+    <h2><span class="n">02</span>逐档明细</h2>
+    <p class="sub">全部字段取自 <span class="mono">eeg_defect_rate</span> 返回，未自行计算。</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table id="detailTable">
+        <thead>
+          <tr>
+            <th>档</th><th>策略</th><th class="num">n</th><th class="num">n_significant</th>
+            <th class="num">虚报率</th><th>Wilson 95%</th><th class="num">observed_mean</th>
+            <th class="num">median_p</th><th class="num">analytical_baseline</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div class="card">
+        <h3 style="margin:0 0 10px;font-size:14px">budget=24 两臂配对（同 seed）</h3>
+        <table>
+          <thead><tr><th>臂</th><th class="num">observed_mean</th><th class="num">虚报率</th><th class="num">median_p</th></tr></thead>
+          <tbody>
+            <tr><td>hill</td><td class="num">0.5616</td><td class="num">0.50</td><td class="num">0.0484</td></tr>
+            <tr><td>random</td><td class="num">0.5608</td><td class="num">0.55</td><td class="num">0.0323</td></tr>
+            <tr style="background:#fafbfc"><td><b>hill − random</b></td><td class="num"><b>+0.0008</b></td><td class="num"><b>−0.05</b></td><td class="num"><b>+0.0161</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px;font-size:14px">可辨别性判断</h3>
+        <p style="margin:0;font-size:13.5px;color:#3b4753">
+          两臂 <span class="mono">observed_mean</span> 之差仅 <b>+0.0008</b>（远小于折间 std 0.019），
+          Wilson 区间大幅重叠。在零信号数据上，爬山法与随机抽样产出的「最好配置」均值几乎相同
+          ——<b>无可辨别的差别</b>。即便只随机抽样，只要搜 24 个再挑最好报 p，虚报率同样 0.55。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="artifacts">
+    <h2><span class="n">03</span>产物清单：每个数字的 handle</h2>
+    <p class="sub">共 80 个第三幕试验 handle + 9 个第一幕产物 handle。可按档位筛选或按 handle / seed 检索。</p>
+
+    <div class="card">
+      <h3 style="margin:0 0 12px;font-size:14px">第三幕 · 零信号试验（80 个 <span class="mono">eval_*</span>）</h3>
+      <div class="controls">
+        <div class="seg" id="budgetSeg">
+          <button data-b="all" class="on">全部</button>
+          <button data-b="1">budget=1</button>
+          <button data-b="4">budget=4</button>
+          <button data-b="24h">budget=24 · hill</button>
+          <button data-b="24r">budget=24 · random</button>
+        </div>
+        <input type="search" id="hsearch" placeholder="检索 handle 或 seed…">
+        <span class="count" id="hcount"></span>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>档</th><th>策略</th><th class="num">seed</th><th>handle</th></tr></thead>
+          <tbody id="handleBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h3 style="margin:0 0 12px;font-size:14px">第一幕 · 可引用产物（9 个，<span class="mono">eeg_evidence</span> 返回 <span class="mono">refused: []</span>）</h3>
+      <div style="overflow:auto">
+        <table>
+          <thead><tr><th>handle</th><th>来源工具</th><th>对应配置 / 说明</th></tr></thead>
+          <tbody id="act1Body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="repro">
+    <h2><span class="n">04</span>复现判定</h2>
+    <p class="sub">「文档现有值」取本次运行前 <code>docs/report.md</code> 与 <code>docs/zero-signal.md</code> 中的值。</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>项</th><th>本次值</th><th>文档现有值</th><th>是否一致</th></tr></thead>
+        <tbody id="reproBody"></tbody>
+      </table>
+    </div>
+    <div class="callout" style="margin-top:14px">
+      <b>判定：第三幕完全复现；第一幕不一致，且不一致有确定原因。</b>
+      第三幕 budget=1/4 两档的 40 个 handle 与更早一批完全相同，budget=24 两臂亦复现同一批
+      ——产物内容寻址（SHA-256），同参数即同 handle，这是「同参数 → 同数字」的机械证据。
+      第一幕的差异来自 agent 的配置选择漂移，见下一节。
+    </div>
+  </section>
+
+  <section id="drift">
+    <h2><span class="n">05</span>两次运行的结果漂移</h2>
+    <p class="sub">同一提示词、同一份数据（<span class="handle">raw_057280305171</span>）、同一套工具，agent 跑了两次第一幕，主结果不一致。漂移本身就是结论。</p>
+    <div class="drift">
+      <div class="card old">
+        <h3>上一次 · 2026-10-01（父会话）</h3>
+        <div class="big" style="color:#b45309">0.6078</div>
+        <p style="margin:2px 0 12px;font-size:12.5px;color:var(--muted)">within_subject 平衡准确率 · <span class="handle">eval_e1f105361a73</span></p>
+        <dl class="kv">
+          <dt>crop_sec</dt><dd>[0.0, 4.0] s</dd>
+          <dt>reject_uv</dt><dd>200 µV</dd>
+          <dt>预处理产物</dt><dd><span class="handle">clean_ef8447bc1684</span>（270→269 段）</dd>
+          <dt>cross_subject</dt><dd>0.5083（<span class="handle">eval_eb605cf8fcb9</span>）</dd>
+          <dt>bandpower 对照</dt><dd>0.5321（<span class="handle">eval_0b286a275d6a</span>）</dd>
+          <dt>30 次置换 p</dt><dd>0.0323（<span class="handle">eval_cb6ff2ae1fea</span>）</dd>
+        </dl>
+      </div>
+      <div class="card new">
+        <h3>本次 · run-20261002（fork）</h3>
+        <div class="big" style="color:#0f766e">0.5815</div>
+        <p style="margin:2px 0 12px;font-size:12.5px;color:var(--muted)">within_subject 平衡准确率 · <span class="handle">eval_8c77857b35a5</span></p>
+        <dl class="kv">
+          <dt>crop_sec</dt><dd>[0.5, 3.5] s</dd>
+          <dt>reject_uv</dt><dd>150 µV</dd>
+          <dt>预处理产物</dt><dd><span class="handle">clean_c1f187bc3587</span>（270→251 段）</dd>
+          <dt>cross_subject</dt><dd>0.5142（<span class="handle">eval_45e9e5f5c119</span>）</dd>
+          <dt>bandpower 对照</dt><dd>0.5785（<span class="handle">eval_f3e2ae7ae619</span>）</dd>
+          <dt>30 次置换 p</dt><dd>0.0323（<span class="handle">eval_7e9cd9efe979</span>）</dd>
+        </dl>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3 style="margin:0 0 10px;font-size:14px">冻结基线：两次为同一 handle</h3>
+      <p style="margin:0;font-size:13.5px">
+        服务端 <span class="mono">eeg_ablation</span> 的 bandpower+LDA 基线两次均给出
+        <span class="handle">eval_97c24b8b38c1</span> = <b>0.5667</b>，分毫不差。
+        同一份数据、同一套代码，内容寻址产物逐字节相同。
+      </p>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px">漂移不是数据或工具造成的</h3>
+        <p style="margin:0;font-size:13.5px;color:#3b4753">冻结基线同一 handle；第三幕两档 40 个 handle 也逐一致复现。</p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px;font-size:14px">漂移出在 agent 的预处理选择</h3>
+        <p style="margin:0;font-size:13.5px;color:#3b4753">换一个预处理旋钮，主结论可以差 ~0.03，而这不是「谁对谁错」，是「挑哪个」的问题。</p>
+      </div>
+    </div>
+    <div class="callout warn" style="margin-top:14px">
+      两次的置换 p 都是 <b>0.0323</b>、都「显著」，但两次对应的观测值并不相同（0.6078 / 0.5815）
+      ——<b>同一个「显著」标签，底下是两个不同的数。</b>这与第二幕的毛病同源：报告的主数字依赖一个事后选定的配置。
+    </div>
+  </section>
+
+  <section id="anomaly">
+    <h2><span class="n">06</span>异常与超时（如实记录，不静默跳过）</h2>
+    <p class="sub">三档最终均为 20/20，无静默跳过、无失败丢失。</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th class="num">#</th><th>阶段</th><th class="num">seed</th><th>错误</th><th>处理</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="num">1</td><td>P3c budget=24·hill</td><td class="num">8</td>
+            <td><span class="mono">MCP error -32001: Request timed out</span>，连续 8 次</td>
+            <td>每次等待约 30 s–2 min 后重发同一组参数；期间用轻量 <span class="mono">eeg_artifacts</span> 探测确认 MCP 已恢复</td>
+            <td>第 8 次命中 <span class="handle">eval_6c79fd3a3583</span>（observed=0.5554，p=0.0323，显著）；该档 20/20</td>
+          </tr>
+          <tr>
+            <td class="num">2</td><td>P0（预演）</td><td class="num">—</td>
+            <td>首次 P0 自检后用户取消（“先把这次已取消的对话忘掉”）</td>
+            <td>重新下发 P0</td>
+            <td>第二次 P0 全项通过</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout" style="margin-top:14px">
+      超时根因：budget=24 单次试验耗时超客户端 2 分钟窗口（服务端仍在计算），非数据/工具缺陷。
+      更早一批（12:05 UTC）曾记录 7 次超时（budget=1：seed 8/10/11/15；budget=4：seed 11/15/16），本轮重跑未再出现。
+    </div>
+  </section>
+
+  <footer>
+    <p><b>数据来源</b>：<code>docs/evidence/run-20261002/summary.md</code>（P4 由 agent 写入）、
+      <code>docs/evidence/run-20261002/README.md</code>（运行台账）、<code>docs/report.md</code> §7、<code>docs/zero-signal.md</code>。
+      每个 <span class="mono">eval_*</span> handle 均可由 <span class="mono">eeg_evidence</span> 解析到磁盘产物。</p>
+    <p><span class="no-fab">本页不编造任何数字</span>：所有数值均逐字取自上述文件；
+      未测量的项一律标注「未测量」，不做插值或估计。会话诊断包（含 PII）不随仓库分发。</p>
+    <p class="mono" style="color:#8b95a1">EEG Agent · U049 · 2026 江苏省 AI+科学与工程创新实践黑客松</p>
+  </footer>
+</div>
+
+<script>
+const DATA = {
+  detail: [
+    {b:"budget=1",  arm:"hill",        n:20, k:2,  rate:0.10,  ci:"[0.0279, 0.301]",  obs:0.4944, mp:0.629,  base:0.0323},
+    {b:"budget=4",  arm:"hill",        n:20, k:4,  rate:0.20,  ci:"[0.0807, 0.416]",  obs:0.5329, mp:0.129,  base:0.1176},
+    {b:"budget=24", arm:"hill",        n:20, k:10, rate:0.50,  ci:"[0.2993, 0.7007]", obs:0.5616, mp:0.0484, base:0.4444},
+    {b:"budget=24", arm:"random",      n:20, k:11, rate:0.55,  ci:"[0.3421, 0.7418]", obs:0.5608, mp:0.0323, base:0.4444},
+    {b:"budget=24", arm:"hill+random", n:40, k:21, rate:0.525, ci:"[0.375, 0.6706]",  obs:0.5612, mp:0.0323, base:0.4444, merged:true}
+  ],
+  handles: {
+    "1":  ["eval_2117a113ea12","eval_7adb03da01a9","eval_be3fc9bca51b","eval_2d88c8cf95af","eval_022e9395f2d7",
+           "eval_2f2a89a85b25","eval_dd97aac4fb2f","eval_78b558773456","eval_c049acd5b92e","eval_cdb73b157d24",
+           "eval_7b398734f7ca","eval_e1414aeeb761","eval_355d3f1a063f","eval_cdca91bbbcaf","eval_846bff3f6fe1",
+           "eval_7b9221cc9d2d","eval_672d20b94f47","eval_2344850450dd","eval_16ae69f88608","eval_6a0b1afb1c2b"],
+    "4":  ["eval_8f9b66895f75","eval_dadbab309f0c","eval_dffe8f681ffb","eval_c764ea093287","eval_5028fcd0be75",
+           "eval_c4e86a9ab7cf","eval_a69e79dbdd67","eval_afafe7b2089c","eval_2ad64a4d0c04","eval_6be1bf01adb0",
+           "eval_9bfed7fbce65","eval_e2274de919ed","eval_a5723d05afbc","eval_d3903c9721c0","eval_960e04818139",
+           "eval_8415979d1c32","eval_50e59c4fcb9e","eval_2f5fc766dc69","eval_afcf928ed184","eval_f7a3ca0b14b0"],
+    "24h":["eval_a433a12a5244","eval_b816a573523c","eval_d845f695f058","eval_6e474a9aa704","eval_da073d11fe1e",
+           "eval_d02dd5de6920","eval_be41fc3df59a","eval_6c79fd3a3583","eval_8d27e398d1f3","eval_d85d6df8ad25",
+           "eval_48cae117f544","eval_67fe3aceabed","eval_2b30bb137eee","eval_d9bdc2fe40ca","eval_fb292f55e5c2",
+           "eval_206114846da0","eval_3182d88f8e57","eval_3de8afb8ac09","eval_2f8ef2eb459b","eval_5e22724660be"],
+    "24r":["eval_80c623937b73","eval_9cc108ce78a5","eval_3cc6987d232d","eval_0e304dc13f8e","eval_671134866383",
+           "eval_8e9d7880b7af","eval_71504a41a67c","eval_ff99f3cd9f87","eval_4a5a89e71c82","eval_6f79ab7303c7",
+           "eval_794cb33dedee","eval_beee6f5befec","eval_fb41bf2098a6","eval_c1b25a94c593","eval_eddb38c4dab9",
+           "eval_e8ebea1826c2","eval_48d2a22dcd04","eval_899639c00739","eval_ea106cada71c","eval_8a32ca74b5ee"]
+  },
+  act1: [
+    {h:"eval_f3e2ae7ae619", t:"eeg_evaluate", d:"bandpower+LDA, within_subject（0.5785）"},
+    {h:"eval_1ad0ccd0f7c6", t:"eeg_evaluate", d:"CSP+LDA, within_subject（0.5806）"},
+    {h:"eval_45e9e5f5c119", t:"eeg_evaluate", d:"CSP+LDA, cross_subject（0.5142）"},
+    {h:"eval_8c77857b35a5", t:"eeg_evaluate", d:"CSP+LDA, 窗口[0.5,3.5], within_subject（0.5815，主结果）"},
+    {h:"eval_5a7ec8bf3159", t:"eeg_validate", d:"置换 batch1（seed=1, n=10）"},
+    {h:"eval_1308dba6b12e", t:"eeg_validate", d:"置换 batch2（seed=2, n=10）"},
+    {h:"eval_19b187557ac5", t:"eeg_validate", d:"置换 batch3（seed=3, n=10）"},
+    {h:"eval_7e9cd9efe979", t:"eeg_validate", d:"合并 30 次置换（p=0.0323）"},
+    {h:"eval_97c24b8b38c1", t:"eeg_evaluate", d:"冻结基线 bandpower+LDA（0.5667）"}
+  ],
+  repro: [
+    {item:"第一幕 within_subject 平衡准确率", cur:"0.5815（eval_8c77857b35a5）", old:"0.6078（eval_e1f105361a73）", ok:false},
+    {item:"第一幕 cross_subject 平衡准确率", cur:"0.5142（eval_45e9e5f5c119）", old:"0.5083（eval_eb605cf8fcb9）", ok:false},
+    {item:"第一幕置换检验 p（30 次合并）", cur:"0.0323（eval_7e9cd9efe979）", old:"0.0323（eval_cb6ff2ae1fea）", ok:true},
+    {item:"第一幕冻结基线 bandpower+LDA", cur:"0.5667（eval_97c24b8b38c1）", old:"0.5667（同 handle）", ok:true},
+    {item:"第三幕 budget=1 defect_rate", cur:"0.10（2/20）", old:"0.10", ok:true},
+    {item:"第三幕 budget=4 defect_rate", cur:"0.20（4/20）", old:"0.20", ok:true},
+    {item:"第三幕 budget=24 defect_rate", cur:"0.525（21/40）", old:"0.525", ok:true}
+  ],
+  curve: {
+    budgets:[1,4,24],
+    merged:[0.10,0.20,0.525],
+    mergedCI:[[0.0279,0.301],[0.0807,0.416],[0.375,0.6706]],
+    mergedN:[[2,20],[4,20],[21,40]],
+    base:[0.0323,0.1176,0.4444],
+    arms24:{hill:{rate:0.50,obs:0.5616,ci:[0.2993,0.7007],n:"10/20"},
+            random:{rate:0.55,obs:0.5608,ci:[0.3421,0.7418],n:"11/20"}}
+  }
+};
+
+/* ---------- 明细表 ---------- */
+const fmt = v => v.toFixed(3).replace(/(\.\d{2})0$/, '$1');
+const dt = document.querySelector('#detailTable tbody');
+DATA.detail.forEach(r=>{
+  const tr = document.createElement('tr');
+  if(r.merged) tr.style.background = '#f2f8f7';
+  tr.innerHTML = `<td>${r.b}${r.merged?' <span class="tag ok">合并</span>':''}</td>
+    <td>${r.arm}</td><td class="num">${r.n}</td><td class="num">${r.k}</td>
+    <td class="num"><b>${fmt(r.rate)}</b></td>
+    <td class="mono">${r.ci}</td><td class="num">${r.obs}</td><td class="num">${r.mp}</td><td class="num">${r.base}</td>`;
+  dt.appendChild(tr);
+});
+
+/* ---------- handle 检索 ---------- */
+const HBODY = document.querySelector('#handleBody');
+const HCOUNT = document.querySelector('#hcount');
+const SEARCH = document.querySelector('#hsearch');
+const SEG = document.querySelector('#budgetSeg');
+let curBudget = 'all';
+
+function handleRows(){
+  const out = [];
+  const label = {'1':'budget=1','4':'budget=4','24h':'budget=24','24r':'budget=24'};
+  const arm = {'1':'hill','4':'hill','24h':'hill','24r':'random'};
+  ['1','4','24h','24r'].forEach(k=>{
+    DATA.handles[k].forEach((h,i)=>{
+      out.push({key:k, b:label[k], arm:arm[k], seed:i+1, h:h});
+    });
+  });
+  return out;
+}
+const ALLROWS = handleRows();
+
+function renderHandles(){
+  const q = SEARCH.value.trim().toLowerCase();
+  let rows = ALLROWS;
+  if(curBudget !== 'all') rows = rows.filter(r=>r.key===curBudget);
+  if(q) rows = rows.filter(r=> r.h.toLowerCase().includes(q) || String(r.seed).includes(q));
+  HBODY.innerHTML = rows.map(r=>`<tr>
+      <td>${r.b}</td><td>${r.arm}</td><td class="num">${r.seed}</td>
+      <td><span class="handle">${r.h}</span></td></tr>`).join('');
+  HCOUNT.textContent = `显示 ${rows.length} / ${ALLROWS.length} 个 handle`;
+}
+SEG.addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  SEG.querySelectorAll('button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); curBudget = btn.dataset.b; renderHandles();
+});
+SEARCH.addEventListener('input', renderHandles);
+renderHandles();
+
+/* ---------- 第一幕产物 ---------- */
+document.querySelector('#act1Body').innerHTML = DATA.act1.map(r=>`
+  <tr><td><span class="handle">${r.h}</span></td><td class="mono">${r.t}</td><td>${r.d}</td></tr>`).join('');
+
+/* ---------- 复现判定 ---------- */
+document.querySelector('#reproBody').innerHTML = DATA.repro.map(r=>`
+  <tr><td>${r.item}</td><td>${r.cur}</td><td>${r.old}</td>
+  <td>${r.ok?'<span class="tag ok">✓ 一致</span>':'<span class="tag no">✗ 不一致</span>'}</td></tr>`).join('');
+
+/* ---------- 预算曲线 ---------- */
+(function drawChart(){
+  const svg = document.getElementById('chart');
+  const tip = document.getElementById('tip');
+  const wrap = document.getElementById('chartwrap');
+  const W=780,H=400, L=64,R=26,T=26,B=58;
+  const xs = DATA.curve.budgets.map(b=>Math.log10(b));
+  const x0=xs[0], x1=xs[xs.length-1];
+  const px = v => L + (Math.log10(v)-x0)/(x1-x0)*(W-L-R);
+  const yMax=0.8;
+  const py = v => H-B - (v/yMax)*(H-B-T);
+  const NS='http://www.w3.org/2000/svg';
+  const el=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+  // gridlines + y labels
+  [0,0.2,0.4,0.6,0.8].forEach(v=>{
+    svg.appendChild(el('line',{x1:L,x2:W-R,y1:py(v),y2:py(v),stroke:'#eef1f4','stroke-width':1}));
+    const t=el('text',{x:L-12,y:py(v)+4,'text-anchor':'end',fill:'#8b95a1','font-size':12});
+    t.textContent=v.toFixed(1); svg.appendChild(t);
+  });
+  // nominal 0.05
+  svg.appendChild(el('line',{x1:L,x2:W-R,y1:py(0.05),y2:py(0.05),stroke:'#b91c1c','stroke-width':1.4,'stroke-dasharray':'5 4',opacity:.75}));
+  const nt=el('text',{x:W-R,y:py(0.05)-7,'text-anchor':'end',fill:'#b91c1c','font-size':11.5,'font-weight':600});
+  nt.textContent='名义水平 0.05'; svg.appendChild(nt);
+
+  // x ticks
+  DATA.curve.budgets.forEach(b=>{
+    const t=el('text',{x:px(b),y:H-B+22,'text-anchor':'middle',fill:'#5c6674','font-size':12.5});
+    t.textContent='budget='+b; svg.appendChild(t);
+    svg.appendChild(el('line',{x1:px(b),x2:px(b),y1:H-B,y2:H-B+6,stroke:'#c8cfd6','stroke-width':1}));
+  });
+  const xl=el('text',{x:(L+W-R)/2,y:H-12,'text-anchor':'middle',fill:'#8b95a1','font-size':11.5});
+  xl.textContent='搜索规模 budget（对数刻度）'; svg.appendChild(xl);
+  const yl=el('text',{x:16,y:(T+H-B)/2,'text-anchor':'middle',fill:'#8b95a1','font-size':11.5,transform:`rotate(-90 16 ${(T+H-B)/2})`});
+  yl.textContent='虚报率 defect_rate'; svg.appendChild(yl);
+
+  // baseline dashed line
+  const bpts = DATA.curve.budgets.map((b,i)=>[px(b),py(DATA.curve.base[i])]);
+  svg.appendChild(el('polyline',{points:bpts.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#b45309','stroke-width':2,'stroke-dasharray':'6 5'}));
+  bpts.forEach(p=>svg.appendChild(el('rect',{x:p[0]-3.5,y:p[1]-3.5,width:7,height:7,fill:'#fff',stroke:'#b45309','stroke-width':2,rx:1.5})));
+
+  // merged line + CI whiskers + points
+  const mpts = DATA.curve.budgets.map((b,i)=>[px(b),py(DATA.curve.merged[i])]);
+  DATA.curve.budgets.forEach((b,i)=>{
+    const [lo,hi]=DATA.curve.mergedCI[i], cx=px(b);
+    svg.appendChild(el('line',{x1:cx,x2:cx,y1:py(lo),y2:py(hi),stroke:'#0f766e','stroke-width':1.6,opacity:.5}));
+    [lo,hi].forEach(v=>svg.appendChild(el('line',{x1:cx-6,x2:cx+6,y1:py(v),y2:py(v),stroke:'#0f766e','stroke-width':1.6,opacity:.5})));
+  });
+  svg.appendChild(el('polyline',{points:mpts.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#0f766e','stroke-width':2.6,'stroke-linejoin':'round'}));
+  mpts.forEach((p,i)=>{
+    svg.appendChild(el('circle',{cx:p[0],cy:p[1],r:6,fill:'#fff',stroke:'#0f766e','stroke-width':2.6}));
+  });
+
+  // arm points at budget=24
+  const x24=px(24);
+  const armColor={hill:'#6d28d9',random:'#db2777'};
+  Object.entries(DATA.curve.arms24).forEach(([k,v])=>{
+    svg.appendChild(el('line',{x1:x24-9,x2:x24+9,y1:py(v.rate),y2:py(v.rate),stroke:armColor[k],'stroke-width':1.4,opacity:.55}));
+    svg.appendChild(el('circle',{cx:x24+(k==='hill'?-11:11),cy:py(v.rate),r:5,fill:'#fff',stroke:armColor[k],'stroke-width':2.4}));
+  });
+
+  // value labels
+  DATA.curve.budgets.forEach((b,i)=>{
+    const t=el('text',{x:px(b),y:py(DATA.curve.merged[i])-14,'text-anchor':'middle',fill:'#0f766e','font-size':13,'font-weight':700});
+    t.textContent=fmt(DATA.curve.merged[i]); svg.appendChild(t);
+  });
+
+  // hotspots + tooltip
+  const items = [];
+  DATA.curve.budgets.forEach((b,i)=>{
+    items.push({cx:px(b),cy:py(DATA.curve.merged[i]),html:
+      `<div><span class="k">budget=</span><b>${b}</b>　<span class="k">合并虚报率</span> <b>${fmt(DATA.curve.merged[i])}</b></div>
+       <div><span class="k">显著 / 总</span> ${DATA.curve.mergedN[i][0]}/${DATA.curve.mergedN[i][1]}</div>
+       <div><span class="k">Wilson 95%</span> [${DATA.curve.mergedCI[i][0]}, ${DATA.curve.mergedCI[i][1]}]</div>
+       <div><span class="k">理论对照线</span> ${DATA.curve.base[i]}</div>`});
+  });
+  Object.entries(DATA.curve.arms24).forEach(([k,v])=>{
+    items.push({cx:x24+(k==='hill'?-11:11),cy:py(v.rate),html:
+      `<div><span class="k">budget=24 ·</span> <b>${k}</b></div>
+       <div><span class="k">虚报率</span> <b>${v.rate.toFixed(2)}</b>（${v.n}）</div>
+       <div><span class="k">observed_mean</span> ${v.obs}</div>
+       <div><span class="k">Wilson 95%</span> [${v.ci[0]}, ${v.ci[1]}]</div>`});
+  });
+  items.forEach(it=>{
+    svg.appendChild(el('circle',{cx:it.cx,cy:it.cy,r:15,fill:'transparent','data-hot':'1'}));
+  });
+  svg.querySelectorAll('[data-hot]').forEach((node,idx)=>{
+    node.style.cursor='pointer';
+    const show=()=>{
+      const it=items[idx];
+      const rect=svg.getBoundingClientRect();
+      const sx=rect.width/W, sy=rect.height/H;
+      tip.innerHTML=it.html; tip.style.opacity=1;
+      let left=it.cx*sx+14, top=it.cy*sy-8;
+      if(left+230>rect.width) left=it.cx*sx-244;
+      tip.style.left=left+'px'; tip.style.top=top+'px';
+    };
+    node.addEventListener('mouseenter',show);
+    node.addEventListener('mousemove',show);
+    node.addEventListener('mouseleave',()=>{tip.style.opacity=0;});
+  });
+})();
+
+/* ---------- nav active state ---------- */
+const links=[...document.querySelectorAll('nav.sticky a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+const obs=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const i=secs.indexOf(e.target);
+      if(i>=0) links[i].classList.add('active');
+    }
+  });
+},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>s&&obs.observe(s));
+</script>
+</body>
+</html>

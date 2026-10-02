@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 400" width="680" height="400" role="img" aria-label="零信号虚报率随搜索规模上升：budget=1 时 0.10，budget=4 时 0.20，budget=24 时 0.525；对应理论对照线 0.032、0.118、0.444，名义 alpha 为 0.05">
+  <style>
+    .t { font-family: 'SF Pro Text','PingFang SC',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; }
+    .title { font-size: 16px; font-weight: 500; fill: #171717; }
+    .sub { font-size: 12px; fill: #52525B; }
+    .tick { font-size: 12px; fill: #52525B; }
+    .axist { font-size: 12px; font-weight: 500; fill: #52525B; }
+    .val { font-size: 14px; font-weight: 600; fill: #171717; font-variant-numeric: tabular-nums; }
+    .refl { font-size: 12px; fill: #52525B; }
+    .lg { font-size: 12px; fill: #52525B; }
+    .grid { fill: none; stroke: #EAEAEC; stroke-width: 1; }
+    .axis { stroke: #DDDDDE; stroke-width: 1; }
+    .refline { stroke: #52525B; stroke-width: 1; stroke-dasharray: 3 4; }
+    .base { fill: none; stroke: #A9AEFF; stroke-width: 2; stroke-dasharray: 7 5; stroke-linecap: round; stroke-linejoin: round; }
+    .basedot { fill: #A9AEFF; stroke: #F7F7F8; stroke-width: 1.5; }
+    .whisk { fill: none; stroke: #3C2ECA; stroke-width: 1.5; opacity: 0.5; }
+    .meas { fill: none; stroke: #3C2ECA; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .measdot { fill: #3C2ECA; stroke: #F7F7F8; stroke-width: 2; }
+  </style>
+
+  <rect x="0.5" y="0.5" width="679" height="399" rx="12" fill="#F7F7F8" stroke="#DDDDDE"/>
+
+  <text class="t title" x="24" y="38">虚报率随搜索规模上升</text>
+  <text class="t sub" x="24" y="60">零信号数据 · n_perm=30 · α=0.05 · 每档取分数最高的配置再报数</text>
+
+  <text class="t axist" x="72" y="78">虚报率</text>
+  <path class="grid" d="M72 90H632 M72 120H632 M72 150H632 M72 180H632 M72 210H632 M72 240H632 M72 270H632 M72 300H632"/>
+  <text class="t tick" x="62" y="300" text-anchor="end" dominant-baseline="middle">0</text>
+  <text class="t tick" x="62" y="240" text-anchor="end" dominant-baseline="middle">0.2</text>
+  <text class="t tick" x="62" y="180" text-anchor="end" dominant-baseline="middle">0.4</text>
+  <text class="t tick" x="62" y="120" text-anchor="end" dominant-baseline="middle">0.6</text>
+
+  <line class="axis" x1="72" y1="300" x2="632" y2="300"/>
+  <line class="refline" x1="72" y1="285" x2="632" y2="285"/>
+  <text class="t refl" x="630" y="278" text-anchor="end">名义 α = 0.05</text>
+
+  <path class="whisk" d="M120 291.6V209.7 M114 291.6H126 M114 209.7H126 M352 275.8V175.2 M346 275.8H358 M346 175.2H358 M584 187.5V98.8 M578 187.5H590 M578 98.8H590"/>
+
+  <polyline class="base" points="120,290.3 352,264.7 584,166.7"/>
+  <circle class="basedot" cx="120" cy="290.3" r="3.5"/>
+  <circle class="basedot" cx="352" cy="264.7" r="3.5"/>
+  <circle class="basedot" cx="584" cy="166.7" r="3.5"/>
+
+  <polyline class="meas" points="120,270 352,240 584,142.5"/>
+  <circle class="measdot" cx="120" cy="270" r="5"/>
+  <circle class="measdot" cx="352" cy="240" r="5"/>
+  <circle class="measdot" cx="584" cy="142.5" r="5"/>
+
+  <text class="t val" x="134" y="256" text-anchor="start">0.10</text>
+  <text class="t val" x="366" y="226" text-anchor="start">0.20</text>
+  <text class="t val" x="598" y="128" text-anchor="start">0.525</text>
+
+  <text class="t tick" x="120" y="318" text-anchor="middle">budget=1</text>
+  <text class="t tick" x="352" y="318" text-anchor="middle">budget=4</text>
+  <text class="t tick" x="584" y="318" text-anchor="middle">budget=24</text>
+  <text class="t tick" x="120" y="334" text-anchor="middle">n=20 · 不搜索</text>
+  <text class="t tick" x="352" y="334" text-anchor="middle">n=20</text>
+  <text class="t tick" x="584" y="334" text-anchor="middle">n=40</text>
+  <text class="t axist" x="352" y="354" text-anchor="middle">搜索配置数 budget（离散档位，等距示意）</text>
+
+  <line x1="72" y1="382" x2="90" y2="382" stroke="#3C2ECA" stroke-width="2.5" stroke-linecap="round"/>
+  <text class="t lg" x="96" y="386">实测虚报率（Wilson 95% CI）</text>
+  <line x1="300" y1="382" x2="318" y2="382" stroke="#A9AEFF" stroke-width="2" stroke-dasharray="7 5" stroke-linecap="round"/>
+  <text class="t lg" x="324" y="386">理论对照线 B/(B+n_perm)</text>
+  <line x1="470" y1="382" x2="488" y2="382" stroke="#52525B" stroke-width="1" stroke-dasharray="3 4"/>
+  <text class="t lg" x="494" y="386">名义 α = 0.05</text>
+</svg>

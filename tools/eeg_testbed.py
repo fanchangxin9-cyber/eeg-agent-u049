@@ -367,13 +367,8 @@ class Testbed:
                  source_root: str | Path | None = None):
         """root=None 表示产物落进**当前 cache 根**（与常规产物同处一地）。
 
-        什么时候该传 root：
-        - **agent 当实验员**（跑零信号对照）—— 传 None。它本来就知道自己在
-          做什么，不需要隔离；而且产物必须在常规根里，`eeg_evidence` /
-          `eeg_defect_rate` 才找得到它们。
-        - **agent 当被试**（测它面对零信号的自然反应）—— 由外部把
-          `EEG_ARTIFACT_DIR` 整个指到一个**只装孪生体**的目录，真品从不进入，
-          它就没有可对照的 handle。这种情况不该由本类处理，见 check_blinding.py。
+        传 None 是刻意的：零信号对照实验的产物必须落在常规根里，
+        `eeg_evidence` / `eeg_defect_rate` 才找得到它们，数字才进得了证据链。
         """
         self.source_raw = source_raw
         # 传给 cache_root_at 的值：None = 不改环境变量，用当前根

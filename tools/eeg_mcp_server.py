@@ -361,9 +361,6 @@ def _testbed_root():
     返回 None = 落进**当前 cache 根**，与常规产物同处一地。这是刻意的：
     实验员（agent）用它跑零信号对照，产物必须能被 `eeg_evidence` /
     `eeg_defect_rate` 找到，否则数字进不了证据链。
-
-    「agent 当被试」那种需要盲性的场景，隔离由外部把整个
-    `EEG_ARTIFACT_DIR` 指到只装孪生体的目录来实现，不在这里做。
     """
     return None
 

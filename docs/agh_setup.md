@@ -181,9 +181,7 @@ node packages\cli\dist\local\agnes.mjs mcp tools eeg-agent
 | `eeg_defect_rate` | 把若干次试验汇总成**虚报率** |
 
 > 后三个属于零信号试验台，配套技能是 `.agh/skills/honest-lie/`。
-> ⚠️ 它们只给**实验员**用。「测一个不知情的 agent 面对零信号会说什么」
-> 那组实验**不能加载这份技能**，否则它会知道数据是零信号的，
-> 测的就不再是自然反应——那种情况仍用 `eeg-analysis`。
+> 它们是**实验员**侧的工具：驱动零信号对照实验、汇总虚报率。
 
 > 这一步不需要模型账号，可以先把 MCP 连通性验完再去配模型。
 > 若 `mcp tools` 报错，先看 `mcp status` 的连接状态与安全错误码，不要急着重装。

@@ -30,7 +30,7 @@
 | 字段 | 在哪 |
 |---|---|
 | 项目名称 / 组别 / 学校专业 | `README.md` 顶部信息表 |
-| 问题来源 / 目标 / 核心方法 | `README.md`「它解决什么问题」 |
+| 问题来源 / 目标 / 核心方法 | `README.md`「第一幕 · 问题来源 / 项目目标 / 核心方法」 |
 | AGH 执行流程 | `README.md`「AGH 执行流程」+ `docs/agh_setup.md` §5 |
 | 模型名称、版本、使用环节、调用方式 | `README.md` 模型表 |
 
@@ -60,6 +60,9 @@
 
 - [ ] **AGH 执行记录**（导出/截图），见 `docs/evidence-guide.md`
 - [ ] **工具调用过程**：完整闭环的调用链
+- [ ] **三幕权威运行台账**：`docs/evidence/run-20261002/README.md`（时间线、会话 ID、
+      超时记录、复现判定）+ 数字汇总 `docs/evidence/run-20261002/summary.md`
+- [ ] **交互审计页**：`docs/audit.html`（把 `eval_*` 产物数据固化进页面，可逐档核查）
 - [ ] **正常样例**：`tests/test_normal.py`
 - [ ] **边界样例**：`tests/test_edge.py`
 - [ ] **失败样例**：`tests/test_failure.py`
@@ -67,7 +70,7 @@
 指南这一项写的是「上传可供人工核查的 AGH 执行记录、工具或设备调用过程，
 以及正常、边界和失败三类测试样例」，三类样例缺一不可。
 
-- [ ] 三类测试全绿：`.venv/Scripts/python.exe -m pytest tests/ -q`
+- [ ] 三类测试全绿：`.venv/Scripts/python.exe -m pytest tests/ -q`（实测 56 passed）
 
 ## 五、独立完成声明
 
