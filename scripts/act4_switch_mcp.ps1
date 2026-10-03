@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   在「主仓库」与「第四幕洁净环境」之间切换 AGH 的 eeg-agent MCP 注册。
 
