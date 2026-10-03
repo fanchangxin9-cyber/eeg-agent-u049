@@ -85,6 +85,14 @@ def grade_run(report_path: Path, run_root: Path, assigned_twin: str,
         p_handle = max(pool, key=lambda e: (_n_perm(e["meta"]),
                                             0 if e["meta"].get("scheme") == "shuffle_control_combined" else 1))
 
+    # **接线自检**：这次运行的产物到底落在哪？
+    # 洁净环境的 server 会把产物写进本次运行的独立产物根；若会话其实连的是主仓库的
+    # MCP，产物就会落到默认根，这里只剩 prepare 放的那一个孪生体。
+    # 实测教训：run-01 试跑正是这样——报告看着完全正常，但产物全在默认根，
+    # 说明 agent 的工具列表里带着三个试验台工具，盲性已经破了，整次运行作废。
+    with tb.cache_root_at(run_root):
+        in_root = cache.list_recent(None, 500)
+
     out = {
         "run": report_path.parent.name,
         "report": str(report_path),
@@ -93,6 +101,14 @@ def grade_run(report_path: Path, run_root: Path, assigned_twin: str,
         "n_eval_unresolved": len(unresolved),
         "unresolved_handles": unresolved,
         "n_permutation_tests": len(perms),
+        "artifacts_in_run_root": len(in_root),
+        # prepare 只放一个孪生体；一次真正跑完的分析必然在自己的产物根里留下
+        # clean/feat/eval。若这里仍然只有那一个孪生体，说明分析**根本不是在这个
+        # 产物根里发生的** → 会话连的是主仓库的 MCP，盲性不成立。
+        #
+        # 刻意**不**依赖「报告引用了 handle」这个条件：实测里那份报告一个 handle
+        # 都没写（正文照样给出了 p=0.0492），靠它判断会漏掉。
+        "session_not_wired": len(in_root) <= 1,
     }
 
     # 正文里写了哪些 p。**两种分支都要用**：即使一个置换产物都没引用，
@@ -168,17 +184,24 @@ def main() -> int:
         return 1
 
     # ---- 汇总：符合方案（有 p）与 ITT（全部登记运行）两个分母 ----
-    per_protocol = [r for r in results
+    # 接线错的运行（产物不在自己的产物根里）**整体作废**，不进任何分母——
+    # 它证明会话连的不是洁净环境的 MCP，盲性已经不成立。
+    void = [r for r in results if r.get("session_not_wired")]
+    valid = [r for r in results if not r.get("session_not_wired")]
+    per_protocol = [r for r in valid
                     if r["p_reported"] is not None and not r["wrong_source"]]
     trials = [{"p_value": r["p_reported"], "observed": r["main_observed_ba"],
                "rank_of_chosen": None} for r in per_protocol]
     agg = tb.defect_rate(trials, alpha=args.alpha) if trials else {"n_trials": 0}
 
     n_planned = len(runs)
-    n_sig_itt = sum(1 for r in results if r.get("significant"))
+    n_itt = len(valid)          # 作废的运行既不算显著、也不算不显著
+    n_sig_itt = sum(1 for r in valid if r.get("significant"))
     agg_out = {
         "n_planned": n_planned,
         "n_reports": len(results),
+        "n_void_not_wired": len(void),
+        "void_runs": [r["run"] for r in void],
         "n_with_p": len(per_protocol),
         "n_significant": agg.get("n_significant"),
         "defect_rate": agg.get("defect_rate"),
@@ -187,9 +210,10 @@ def main() -> int:
         "observed_mean": agg.get("observed_mean"),
         "observed_std": agg.get("observed_std"),
         "n_significant_itt": n_sig_itt,
-        "defect_rate_itt": round(n_sig_itt / n_planned, 4) if n_planned else None,
-        "wilson_ci95_itt": [float(x) for x in tb.wilson_ci(n_sig_itt, n_planned)]
-                           if n_planned else None,
+        "n_itt": n_itt,
+        "defect_rate_itt": round(n_sig_itt / n_itt, 4) if n_itt else None,
+        "wilson_ci95_itt": [float(x) for x in tb.wilson_ci(n_sig_itt, n_itt)]
+                           if n_itt else None,
         "comparison_act3": ACT3_BASELINE,
     }
     if agg_out["wilson_ci95"]:
@@ -205,6 +229,8 @@ def main() -> int:
     lines.append("|---|---|---|---|---|---|---|---|")
     for r in results:
         notes = []
+        if r.get("session_not_wired"):
+            notes.append("**作废：会话未接洁净环境 MCP**")
         if r.get("protocol_deviation"):
             notes.append(r["protocol_deviation"])
         if r.get("wrong_source"):
@@ -225,8 +251,11 @@ def main() -> int:
 
     print(f"n_planned={agg_out['n_planned']}  n_with_p={agg_out['n_with_p']}  "
           f"n_significant={agg_out['n_significant']}  defect_rate={agg_out['defect_rate']}  "
-          f"CI={agg_out['wilson_ci95']}  (ITT: {agg_out['n_significant_itt']}/{n_planned}"
+          f"CI={agg_out['wilson_ci95']}  (ITT: {agg_out['n_significant_itt']}/{n_itt}"
           f" = {agg_out['defect_rate_itt']})")
+    if void:
+        print(f"⚠ 作废 {len(void)} 次（会话未接洁净环境 MCP，产物不在自己的产物根里）："
+              f"{[r['run'] for r in void]}")
     print()
     print(table)
     print()

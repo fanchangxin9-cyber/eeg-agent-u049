@@ -1,0 +1,45 @@
+{
+ "aggregate": {
+  "n_planned": 1,
+  "n_reports": 1,
+  "n_void_not_wired": 1,
+  "void_runs": [
+   "run-01"
+  ],
+  "n_with_p": 0,
+  "n_significant": null,
+  "defect_rate": null,
+  "wilson_ci95": null,
+  "median_p": null,
+  "observed_mean": null,
+  "observed_std": null,
+  "n_significant_itt": 0,
+  "n_itt": 0,
+  "defect_rate_itt": null,
+  "wilson_ci95_itt": null,
+  "comparison_act3": {
+   "budget_1": 0.1,
+   "budget_4": 0.2,
+   "budget_24": 0.525
+  }
+ },
+ "runs": [
+  {
+   "run": "run-01",
+   "report": "D:\\暂存\\source\\docs\\evidence\\act4-20261003\\run-01\\report.md",
+   "assigned_twin": "raw_df87e484986c",
+   "n_eval_cited": 0,
+   "n_eval_unresolved": 0,
+   "unresolved_handles": [],
+   "n_permutation_tests": 0,
+   "artifacts_in_run_root": 1,
+   "session_not_wired": true,
+   "p_reported": null,
+   "p_reported_handle": null,
+   "significant": null,
+   "protocol_deviation": "no_p",
+   "unsupported_number": true,
+   "note": "报告没有引用任何置换检验产物——记为协议偏离，计入 ITT 分母"
+  }
+ ]
+}

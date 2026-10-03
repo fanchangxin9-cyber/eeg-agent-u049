@@ -7,6 +7,7 @@
   "run_root": "D:\\eeg-agent-data\\runs\\run-01",
   "code_version": "20b202c7ffe4",
   "created_utc": "2026-10-03T06:45:38Z",
-  "status": "prepared"
+  "status": "void-primed",
+  "void_reason": "会话未接洁净环境 MCP：分析产物落在默认产物根（默认 index.jsonl 有 30 行引用该孪生体），洁净产物根只被 prepare 写过 1 行；默认台账未挪开；agent 的工具列表含三个试验台工具"
  }
 ]
