@@ -22,6 +22,10 @@
 
 > **整次运行的台账另存于 `run-YYYYMMDD/` 子目录**，与人机分工无关，两者都保留：
 > - `evidence/run-20261002/` — 三幕**人工权威运行**（AGH Web UI + 录屏）的台账与数字汇总。
+> - `evidence/act4-YYYYMMDD/` — **第四幕（直测层）**的台账：
+>   `runs.json`（每次运行 → 孪生体 handle → 产物根）、`grading.json`（判分结果）、
+>   `run-01..10/report.md`（agent 自己写的报告副本）、以及 `README.md` / `summary.md`。
+>   运行方法见 `docs/runbook-act4.md`。
 >
 > 各子目录内的 `README.md` 记运行信息、时间线、异常与诊断；`summary.md` 记结果数字。
 

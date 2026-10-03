@@ -1,0 +1,12 @@
+[
+ {
+  "run": "01",
+  "seed": 1,
+  "twin_handle": "raw_df87e484986c",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data\\runs\\run-01",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-03T06:45:38Z",
+  "status": "prepared"
+ }
+]
