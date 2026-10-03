@@ -98,11 +98,30 @@ def _default_source_root() -> Path:
     return Path(base) / "eeg-agent" / "artifacts"
 
 
+def _collect(env: Path, evidence_dir: Path, label: str) -> Path | None:
+    """把洁净环境里的 `docs/report.md` **移**到证据目录。
+
+    用「移」而不是「拷」有两个好处：
+    - 幂等：报告已经归档过，第二次调不会重复；
+    - 顺便把工作区清干净——下一次运行开始时 `docs/report.md` 必须是**不存在**的，
+      否则那次的 agent 一进工作区就看到上一次的报告，等于把答案摆在桌上。
+    """
+    src = env / "docs" / "report.md"
+    if not src.exists():
+        return None
+    dst = evidence_dir / label / "report.md"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(src), str(dst))
+    return dst
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="为第四幕第 N 次运行准备孪生体")
-    ap.add_argument("--run", required=True, help="运行编号，如 01（seed 即该编号）")
+    ap.add_argument("--run", default=None, help="运行编号，如 01（seed 即该编号）")
+    ap.add_argument("--collect", default=None, metavar="NN",
+                    help="只收集 run-NN 的报告，不准备新的运行")
     ap.add_argument("--env", required=True, help="洁净环境目录（act4_make_env.py 的 --dest）")
-    ap.add_argument("--data", required=True,
+    ap.add_argument("--data", default=None,
                     help="实验数据根，如 D:/eeg-agent-data。"
                          "**不要放在工作区所在的目录树下**：agent 一句 ls .. 就会看到"
                          "runs/run-01..run-10 与 ledger/，等于告诉它这是十次一组的实验。")
@@ -113,17 +132,53 @@ def main() -> int:
     ap.add_argument("--wipe", action="store_true", help="该 run 目录已存在时先清空")
     args = ap.parse_args()
 
+    if not args.run and not args.collect:
+        print("要么给 --run NN（准备下一次），要么给 --collect NN（只收集报告）。",
+              file=sys.stderr)
+        return 2
+
+    env = Path(args.env).resolve()
+    if not (env / "tools" / "eeg_mcp_server.py").exists():
+        print(f"洁净环境不完整：{env}（先跑 act4_make_env.py）", file=sys.stderr)
+        return 2
+
+    # ------------------------------------------------ 只收集模式
+    if args.collect:
+        data = Path(args.data).resolve() if args.data else None
+        ledger = Path(args.ledger).resolve() if args.ledger else (
+            data / "runs.json" if data else None)
+        evidence_dir = ledger.parent if ledger else env / "docs" / "evidence"
+        got = _collect(env, evidence_dir, f"run-{args.collect}")
+        if got is None:
+            print(f"没有找到 report.md（run-{args.collect} 可能没跑，或已经收集过）",
+                  file=sys.stderr)
+            return 1
+        print(f"✓ run-{args.collect} 的报告已归档：{got}")
+        return 0
+
     run = args.run
     seed = int(run)          # run-01 → seed 1
-    env = Path(args.env).resolve()
+    if args.data is None:
+        print("--run 模式需要 --data。", file=sys.stderr)
+        return 2
     data = Path(args.data).resolve()
     run_root = data / "runs" / f"run-{run}"
     source_root = Path(args.source_root).resolve() if args.source_root else _default_source_root()
     ledger = Path(args.ledger).resolve() if args.ledger else data / "runs.json"
+    evidence_dir = ledger.parent
 
-    if not (env / "tools" / "eeg_mcp_server.py").exists():
-        print(f"洁净环境不完整：{env}（先跑 act4_make_env.py）", file=sys.stderr)
-        return 2
+    # 0) 先把**上一次**的报告收走（顺便清空工作区，见 _collect 注释）
+    if seed > 1:
+        prev = f"{seed - 1:02d}"
+        got = _collect(env, evidence_dir, f"run-{prev}")
+        print(f"[收集] run-{prev} 的报告 → {got}" if got
+              else f"[收集] 没找到 run-{prev} 的报告（没跑，或已收集过）")
+        print()
+    # 万一上一次没收集干净，这里再兜一次底：工作区不能留着旧报告
+    stale = env / "docs" / "report.md"
+    if stale.exists():
+        stale.unlink()
+        print("[清理] 工作区里残留的 docs/report.md 已删除")
 
     if run_root.exists():
         if not args.wipe:
@@ -187,14 +242,21 @@ def main() -> int:
     ledger.write_text(json.dumps(runs, ensure_ascii=False, indent=1), encoding="utf-8")
 
     print()
-    print(f"✓ run-{run} 就绪")
-    print(f"  孪生体 handle : {handle}")
-    print(f"  台账          : {ledger}")
-    print(f"  产物根指针    : {env / 'artifact_root.txt'}  → {run_root}")
-    print(f"  提示词        : {run_root / 'prompt.txt'}")
+    print(f"✓ run-{run} 就绪   孪生体 {handle}")
+    print(f"  产物根指针 : {env / 'artifact_root.txt'}  → {run_root}")
+    print(f"  台账       : {ledger}")
     print()
-    print("下一步：在 AGH 里新开一条**无父会话**的会话（工作区 = 洁净环境），")
-    print(f"粘贴 {run_root / 'prompt.txt'} 的内容。")
+    print("=" * 72)
+    print(f"↓ 新开一条**无父会话**（工作区 = {env}），把下面整段贴进去 ↓")
+    print("=" * 72)
+    print(prompt)
+    print("=" * 72)
+    print("↑ 粘贴到上面这一行为止。跑完在终端执行下面这条收集报告：")
+    print()
+    print(f"  .venv\\Scripts\\python.exe scripts\\act4_prepare.py --collect {run} "
+          f"--env {env}")
+    print()
+    print(f"  （或者直接开始下一次：--run {seed + 1:02d}，它会自动先收走这次的报告）")
     return 0
 
 

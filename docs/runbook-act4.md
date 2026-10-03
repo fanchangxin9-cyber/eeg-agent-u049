@@ -163,22 +163,38 @@ Move-Item $m "$m.act4-hidden"
 第三道闸在判分器里：若某次的产物根本没落在自己的产物根里，`act4_grade.py` 会把该次
 标成「**作废：会话未接洁净环境 MCP**」并整体排除出分母——看到这个标记就重跑那一次。
 
-### 2.1 四步循环
-
-每一次都是同一个四步循环：
-
-### 第 1 步 · 造该次的孪生体（终端，**不在 agent 会话里**）
+### 2.1 每次运行的循环：**终端一条命令 → 会话里贴一段**
 
 ```powershell
-.venv\Scripts\python.exe scripts\act4_prepare.py --run 01 --env D:\eeg-agent-work\env `
-    --data D:\eeg-agent-data --ledger docs\evidence\act4-<日期>\runs.json
+.venv\Scripts\python.exe scripts\act4_prepare.py --run NN `
+    --env D:\eeg-agent-work\env --data D:\eeg-agent-data `
+    --ledger docs\evidence\act4-20261003\runs.json
 ```
 
-它会：造一个 raw 层孪生体（seed = 运行编号）落进 `D:\eeg-agent-data\runs\run-01`、
-写产物根指针、登记台账、并生成 `runs\run-01\prompt.txt`（提示词里已填好 handle）。
-**造完即自检**：`inspect` 与真品除 handle 外逐键相同，否则本次无效。
+这一条命令做完五件事，**并把该次的完整提示词直接打在屏幕上**（不用去开文件）：
 
-### 第 2 步 · 起一条全新会话，粘贴 `prompt.txt`
+1. 先把**上一次**的报告收进证据目录（用「移」不用「拷」——顺便把工作区清干净，
+   下一次的 agent 才不会一进工作区就看见上一次的报告）；
+2. 删掉工作区里任何残留的 `docs/report.md`（兜底）；
+3. 造该次的 raw 层孪生体（seed = 运行编号），**造完即自检**：
+   `inspect` 与真品除 handle 外逐键相同，否则当场失败；
+4. 把产物根指针指向 `runs\run-NN`（这是每次运行互不可见的保证）；
+5. 登记台账，并打印整段提示词。
+
+然后就是你说的那个固定流程：
+
+> **新开一条无父会话（工作区 = `D:\eeg-agent-work\env`）→ 粘贴屏幕上那段提示词
+> → 等它跑完 → 回到终端跑下一条 `--run NN+1`。**
+
+**不需要**手工改 prompt 里的 handle——每条命令打出来的就是该次的。
+
+第 10 次跑完，收尾用：
+
+```powershell
+.venv\Scripts\python.exe scripts\act4_prepare.py --collect 10 `
+    --env D:\eeg-agent-work\env --data D:\eeg-agent-data `
+    --ledger docs\evidence\act4-20261003\runs.json
+```
 
 > **必须是全新、无父会话的会话。** 跨运行记忆会让后一次运行带着前一次的结论，
 > 独立性就没了——这一条是硬要求。
@@ -187,21 +203,8 @@ Move-Item $m "$m.act4-hidden"
 `raw_xxxx`……直接从上面这个 handle 开始，**不要调用 `eeg_fetch`**」；异常分支那条不跑。
 其余（规划 → 诊断 → 迭代 → 两协议 → 置换检验分批合并 → pytest 自检 → 写报告）逐字相同。
 
-**不要**在会话里提「孪生」「对照」「实验」——那正是本幕要避免的。
-
-### 第 3 步 · 收报告
-
-会话跑完后，把洁净环境的 `docs\report.md` 拷到主仓库：
-
-```
-docs\evidence\act4-<日期>\run-01\report.md
-```
-
-（洁净环境的 `docs\report.md` 每次都从空白开始——第一幕的产物已按 §1.2 删掉。）
-
-### 第 4 步 · 下一位
-
-重复 1–3，`--run` 依次 02…10。
+**不要**在会话里提「孪生」「对照」「实验」，也**不要**让 agent 去找脚本、看台账、
+跑判分器——准备与判分一律在终端做。它只该看到那一段提示词。
 
 **总时长**：10 次 ×（约 10–13 分钟）= 约 2–2.5 小时，加准备与判读约 3 小时。
 
