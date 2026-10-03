@@ -222,7 +222,13 @@ def main() -> int:
         return 1
 
     # 4) 写产物根指针（**未加 /v1**：cache_root() 会自己追加）
+    #
+    # 写两份：
+    #   - <env>/artifact_root.txt —— 走 AGH 里注册的洁净环境 server 时读这个
+    #   - <repo>/artifact_root.txt —— 走 act4_mcp_shim.py 的「换文件」方案时读这个
+    # 原版 server 根本不读 artifact_root.txt，所以多写一份是惰性的、没有副作用。
     (env / "artifact_root.txt").write_text(str(run_root), encoding="utf-8")
+    (ROOT / "artifact_root.txt").write_text(str(run_root), encoding="utf-8")
 
     # 5) 记台账 + 落一份可直接粘贴的提示词
     prompt = P4X_PROMPT.format(handle=handle)

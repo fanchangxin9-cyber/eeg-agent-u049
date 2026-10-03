@@ -31,3 +31,8 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# 第四幕「换文件」方案（scripts/act4_mcp_shim.py）：
+# 临时把 tools/eeg_mcp_server.py 换成洁净环境那份，备份与产物根指针都别提交。
+tools/.eeg_mcp_server.py.act4bak
+/artifact_root.txt
