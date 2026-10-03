@@ -51,7 +51,8 @@ def main() -> int:
     ap.add_argument("-o", "--out", type=Path)
     args = ap.parse_args()
 
-    recs = [json.loads(l) for l in args.path.read_text(encoding="utf-8").splitlines() if l.strip()]
+    recs = [json.loads(line) for line in args.path.read_text(encoding="utf-8").splitlines()
+            if line.strip()]
 
     out: list[str] = []
     out.append("# AGH 执行轨迹\n")

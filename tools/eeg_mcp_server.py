@@ -19,13 +19,14 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-import eeg_cache as cache  # noqa: E402
-import eeg_pipeline as pipe  # noqa: E402
+import eeg_cache as cache
+import eeg_pipeline as pipe
 
 # MCP SDK 2.x 把 FastMCP 更名为 MCPServer（模块路径也变了）。
 # 两代的用法在这里是兼容的，所以两代都支持，避免因为团队装的版本不同而无法启动。
@@ -78,10 +79,10 @@ def _guard(fn: Callable[[], str]) -> str:
     except MemoryError:
         return _err("E_OUT_OF_MEMORY",
                     "内存不足。请减少被试数量或缩短分析窗口后重试。")
-    except Exception as exc:  # noqa: BLE001 — 兜底，避免任何异常打断协议
+    except Exception as exc:  # 兜底，避免任何异常打断协议
         return _err("E_INTERNAL", f"{type(exc).__name__}: {exc}",
-                    suggestions=["可用 eeg_artifacts 查看当前已有产物，"
-                                 "必要时从上游步骤重新生成。"],
+                    suggestions=[("可用 eeg_artifacts 查看当前已有产物，"
+                                  "必要时从上游步骤重新生成。")],
                     recoverable=True)
 
 

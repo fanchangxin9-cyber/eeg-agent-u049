@@ -24,6 +24,7 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+.ruff_cache/
 *.egg-info/
 
 # 编辑器 / 系统
@@ -31,6 +32,9 @@ venv/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Trae 的 HTML 分享包（本地预览/分享产物，非项目内容）
+.trae-html-share-packages/
 
 # 第四幕「换文件」方案（scripts/act4_mcp_shim.py）：
 # 临时把 tools/eeg_mcp_server.py 换成洁净环境那份，备份与产物根指针都别提交。

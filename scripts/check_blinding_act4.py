@@ -135,7 +135,7 @@ def main() -> int:
     # ---- 2. 该不在的文件都不在 ----
     present = [rel for rel in MUST_NOT_EXIST if (env / rel).exists()]
     rep.check(not present, "实验产物 / 实验技能 / .git 均不存在",
-              f"仍存在：{present}" if present else "共查 %d 项" % len(MUST_NOT_EXIST))
+              f"仍存在：{present}" if present else f"共查 {len(MUST_NOT_EXIST)} 项")
 
     # ---- 3. 泄漏词 ----
     hits = []
@@ -148,7 +148,7 @@ def main() -> int:
             if tok in text:
                 hits.append(f"{p.relative_to(env)}:{text[:text.index(tok)].count(chr(10)) + 1} ← {tok!r}")
     rep.check(not hits, "全树无实验身份词",
-              f"{len(hits)} 处：{hits[:5]}" if hits else "词表 %d 个" % len(LEAK_TOKENS))
+              f"{len(hits)} 处：{hits[:5]}" if hits else f"词表 {len(LEAK_TOKENS)} 个")
 
     # ---- 3b. 主仓库路径（通向全部实验文档的指路牌）----
     path_hits, path_notes = [], []

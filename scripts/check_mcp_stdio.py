@@ -13,6 +13,7 @@ check_mcp_stdio.py — 验证 MCP server 能被真正拉起并正常握手
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import sys
 from pathlib import Path
@@ -29,10 +30,8 @@ SERVER = ROOT / "tools" / "eeg_mcp_server.py"
 # 强制切到 UTF-8，output 里的中文与符号才能正常落地。
 for _stream in (sys.stdout, sys.stderr):
     if hasattr(_stream, "reconfigure"):
-        try:
+        with contextlib.suppress(ValueError, OSError):
             _stream.reconfigure(encoding="utf-8", errors="replace")
-        except (ValueError, OSError):
-            pass
 PYTHON = sys.executable
 
 EXPECTED = {
@@ -60,78 +59,77 @@ async def main() -> int:
 
     params = StdioServerParameters(command=PYTHON, args=[str(SERVER)], env=None)
 
-    async with stdio_client(params) as (read, write):
-        async with ClientSession(read, write) as session:
-            # 1. 初始化握手
-            info = await session.initialize()
-            # MCP SDK v2 用 snake_case 字段名（v1 是 serverInfo / protocolVersion）
-            si = getattr(info, "server_info", None) or getattr(info, "serverInfo", None)
-            pv = getattr(info, "protocol_version", None) or getattr(info, "protocolVersion", "?")
-            print(f"[1] 握手成功")
-            print(f"    server : {si.name} {si.version}")
-            print(f"    协议   : {pv}")
+    async with stdio_client(params) as (read, write), ClientSession(read, write) as session:
+        # 1. 初始化握手
+        info = await session.initialize()
+        # MCP SDK v2 用 snake_case 字段名（v1 是 serverInfo / protocolVersion）
+        si = getattr(info, "server_info", None) or getattr(info, "serverInfo", None)
+        pv = getattr(info, "protocol_version", None) or getattr(info, "protocolVersion", "?")
+        print("[1] 握手成功")
+        print(f"    server : {si.name} {si.version}")
+        print(f"    协议   : {pv}")
 
-            # 2. 工具目录
-            tools = await session.list_tools()
-            names = {t.name for t in tools.tools}
-            print(f"[2] 工具数 {len(names)}")
-            missing = EXPECTED - names
-            extra = names - EXPECTED
-            if missing:
-                print(f"    ✗ 缺少: {sorted(missing)}")
-                return 1
-            if extra:
-                print(f"    ! 多出: {sorted(extra)}")
-            print(f"    与预期一致 ✓")
+        # 2. 工具目录
+        tools = await session.list_tools()
+        names = {t.name for t in tools.tools}
+        print(f"[2] 工具数 {len(names)}")
+        missing = EXPECTED - names
+        extra = names - EXPECTED
+        if missing:
+            print(f"    ✗ 缺少: {sorted(missing)}")
+            return 1
+        if extra:
+            print(f"    ! 多出: {sorted(extra)}")
+        print("    与预期一致 ✓")
 
-            # 3. 真正调用一次工具（合成数据，不联网、秒级）
-            r = parse(await session.call_tool("eeg_load_synthetic",
-                                              {"n_subjects": 4, "n_trials": 10}))
-            assert r["ok"] is True, r
-            raw = r["handle"]
-            print(f"[3] eeg_load_synthetic → {raw}")
+        # 3. 真正调用一次工具（合成数据，不联网、秒级）
+        r = parse(await session.call_tool("eeg_load_synthetic",
+                                          {"n_subjects": 4, "n_trials": 10}))
+        assert r["ok"] is True, r
+        raw = r["handle"]
+        print(f"[3] eeg_load_synthetic → {raw}")
 
-            r = parse(await session.call_tool("eeg_inspect", {"handle": raw}))
-            print(f"[4] eeg_inspect → n_epochs={r['n_epochs']} "
-                  f"n_channels={r['n_channels']} sfreq={r['sfreq']}")
-            print(f"    warnings={r['warnings']}")
+        r = parse(await session.call_tool("eeg_inspect", {"handle": raw}))
+        print(f"[4] eeg_inspect → n_epochs={r['n_epochs']} "
+              f"n_channels={r['n_channels']} sfreq={r['sfreq']}")
+        print(f"    warnings={r['warnings']}")
 
-            # 4. 走通预处理 → 特征 → 评估
-            r = parse(await session.call_tool(
-                "eeg_preprocess",
-                {"handle": raw, "low_hz": 8.0, "high_hz": 30.0,
-                 "crop_sec": [0.5, 3.5]}))
-            clean = r["handle"]
-            print(f"[5] eeg_preprocess → {clean} (n_epochs={r['summary']['n_epochs_out']})")
+        # 4. 走通预处理 → 特征 → 评估
+        r = parse(await session.call_tool(
+            "eeg_preprocess",
+            {"handle": raw, "low_hz": 8.0, "high_hz": 30.0,
+             "crop_sec": [0.5, 3.5]}))
+        clean = r["handle"]
+        print(f"[5] eeg_preprocess → {clean} (n_epochs={r['summary']['n_epochs_out']})")
 
-            r = parse(await session.call_tool(
-                "eeg_features",
-                {"handle": clean, "feature_set": "bandpower", "bands": ["mu", "beta"]}))
-            feat = r["handle"]
-            print(f"[6] eeg_features → {feat} (n_features={r['summary']['n_features']})")
+        r = parse(await session.call_tool(
+            "eeg_features",
+            {"handle": clean, "feature_set": "bandpower", "bands": ["mu", "beta"]}))
+        feat = r["handle"]
+        print(f"[6] eeg_features → {feat} (n_features={r['summary']['n_features']})")
 
-            r = parse(await session.call_tool(
-                "eeg_evaluate", {"handle": feat, "model": "lda", "cv_folds": 4}))
-            m = r["summary"]["metrics"]
-            print(f"[7] eeg_evaluate → 平衡准确率 {m['balanced_accuracy_mean']} "
-                  f"(随机 {m['chance_level']})")
+        r = parse(await session.call_tool(
+            "eeg_evaluate", {"handle": feat, "model": "lda", "cv_folds": 4}))
+        m = r["summary"]["metrics"]
+        print(f"[7] eeg_evaluate → 平衡准确率 {m['balanced_accuracy_mean']} "
+              f"(随机 {m['chance_level']})")
 
-            # 5. 错误分支：失败必须是结构化的，且带恢复建议
-            r = parse(await session.call_tool("eeg_inspect",
-                                              {"handle": "clean_000000000000"}))
-            assert r["ok"] is False, "失效 handle 竟然没有报错"
-            err = r["error"]
-            print(f"[8] 错误分支 → code={err['code']} recoverable={err['recoverable']}")
-            print(f"    建议列表 {len(err['suggestions'])} 条")
-            assert err["recoverable"] is True
-            assert err["suggestions"], "恢复建议为空，agent 将无法自愈"
+        # 5. 错误分支：失败必须是结构化的，且带恢复建议
+        r = parse(await session.call_tool("eeg_inspect",
+                                          {"handle": "clean_000000000000"}))
+        assert r["ok"] is False, "失效 handle 竟然没有报错"
+        err = r["error"]
+        print(f"[8] 错误分支 → code={err['code']} recoverable={err['recoverable']}")
+        print(f"    建议列表 {len(err['suggestions'])} 条")
+        assert err["recoverable"] is True
+        assert err["suggestions"], "恢复建议为空，agent 将无法自愈"
 
-            # 6. 证据工具应拒绝合成数据
-            r = parse(await session.call_tool("eeg_evidence",
-                                              {"eval_handles": []}))
-            assert r["ok"] is True
-            print(f"[9] eeg_evidence → claims={len(r['claims'])} "
-                  f"refused={len(r['refused'])}")
+        # 6. 证据工具应拒绝合成数据
+        r = parse(await session.call_tool("eeg_evidence",
+                                          {"eval_handles": []}))
+        assert r["ok"] is True
+        print(f"[9] eeg_evidence → claims={len(r['claims'])} "
+              f"refused={len(r['refused'])}")
 
     print("-" * 66)
     print("全部通过：MCP server 可以作为一个真实的 MCP 进程工作。")

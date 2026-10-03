@@ -181,7 +181,7 @@ def export(con, session_key: str, out: Path | None, raw: bool = False) -> int:
 
     lines = []
     for row in rows:
-        rec = {c: _load(v) for c, v in zip(cols, row)}
+        rec = {c: _load(v) for c, v in zip(cols, row, strict=True)}
         env = {}
         for col, key in ENVELOPE:
             val = rec.get(col)

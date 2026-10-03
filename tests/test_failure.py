@@ -15,8 +15,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-import eeg_cache as cache  # noqa: E402
-import eeg_pipeline as pipe  # noqa: E402
+import eeg_cache as cache
+import eeg_pipeline as pipe
 
 
 @pytest.fixture(scope="module")

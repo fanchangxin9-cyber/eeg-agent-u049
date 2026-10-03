@@ -20,8 +20,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-import eeg_cache as cache  # noqa: E402
-import eeg_pipeline as pipe  # noqa: E402
+import eeg_cache as cache
+import eeg_pipeline as pipe
 
 
 def show(title: str, obj) -> None:
@@ -129,7 +129,7 @@ def main() -> int:
     else:
         try:
             abl = pipe.ablation(best_eval)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:  # 兜底：消融失败不应让整体校验崩掉
             abl = {"error": f"{type(exc).__name__}: {exc}"}
     show("5. 与冻结基线对比", abl)
 

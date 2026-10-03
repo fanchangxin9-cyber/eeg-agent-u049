@@ -62,6 +62,9 @@
 - [ ] **工具调用过程**：完整闭环的调用链
 - [ ] **三幕权威运行台账**：`docs/evidence/run-20261002/README.md`（时间线、会话 ID、
       超时记录、复现判定）+ 数字汇总 `docs/evidence/run-20261002/summary.md`
+- [ ] **第三幕无人值守补跑记录**：`docs/evidence/run-20261003/`（P3b/P3c/P3d）
+- [ ] **第四幕直测层台账（N=10）**：`docs/evidence/act4-20261003/README.md` +
+      结果表 `summary.md` + 逐次 `run-01..10/report.md` + 判分 `grading.json`
 - [ ] **交互审计页**：`docs/audit.html`（把 `eval_*` 产物数据固化进页面，可逐档核查）
 - [ ] **正常样例**：`tests/test_normal.py`
 - [ ] **边界样例**：`tests/test_edge.py`
@@ -70,7 +73,7 @@
 指南这一项写的是「上传可供人工核查的 AGH 执行记录、工具或设备调用过程，
 以及正常、边界和失败三类测试样例」，三类样例缺一不可。
 
-- [ ] 三类测试全绿：`.venv/Scripts/python.exe -m pytest tests/ -q`（实测 56 passed）
+- [ ] 三类测试全绿：`.venv/Scripts/python.exe -m pytest tests/ -q`（实测 66 passed）
 
 ## 五、独立完成声明
 

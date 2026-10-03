@@ -1,0 +1,4 @@
+# 开发/静态检查依赖（与运行时依赖分开，参赛提交可不装）
+# 安装：.venv/Scripts/python.exe -m pip install -r requirements-dev.txt
+# 检查：.venv/Scripts/python.exe -m ruff check tools scripts tests
+ruff>=0.9

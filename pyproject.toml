@@ -1,0 +1,38 @@
+# 项目级静态检查配置（ruff）。
+# 运行：.venv/Scripts/python.exe -m ruff check tools scripts tests
+#
+# 设计说明：
+# - E402 启用：MCP server 等文件需要在 sys.path.insert 之后再 import，
+#   有意为之的位置都带着 # noqa: E402 注释，启用后注释保持有效。
+# - E501 不报：行宽由 line-length 控制，中文字符串的实际显示宽度与字节宽度
+#   不一致，硬性报错只会制造噪音。
+# - PL* 系列整体不启用：本项目的测试函数名刻意用中文（可读性远胜英文名）、
+#   工具模块刻意用函数内延迟 import（避免循环依赖）、一次性验证脚本的结构
+#   刻意直白。这些规则只会误报。
+# - RUF046 不报：int(np.int64) 的显式转换是**有意**的——保证 JSON 序列化时
+#   拿到的是 Python int，而不是 numpy 标量。
+# - RUF001/002/003 不报：中文注释与字符串里的全角标点是正确排版，不是笔误。
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "SIM", "RUF"]
+ignore = [
+  "E501",
+  "RUF001",
+  "RUF002",
+  "RUF003",
+  "RUF046",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# 这三个文件参与 code_version() 的哈希（eeg_cache.py 的 code_version()）。
+# **改它们任何一个字节，仓库里所有既有产物 handle 都会立刻失效
+# （E_HANDLE_STALE），包括 docs/report.md 引用的证据。**
+# 体检发现的小问题（未用导入、zip 缺 strict 等）不影响正确性，
+# 为保住产物稳定性，一律不改，并在此豁免。
+"tools/eeg_cache.py" = ["UP035"]
+"tools/eeg_dataset.py" = ["F401", "RUF100"]
+"tools/eeg_pipeline.py" = ["B905", "RUF059", "RUF005", "B007"]

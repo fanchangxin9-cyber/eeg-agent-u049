@@ -1,0 +1,76 @@
+# p3abc 工具调用轨迹（自 AGH 会话库备份重建）
+# 会话 key : agnes:local:local-dev:cli:workspace:326ab9666820d5a8
+# 事件数   : 1442
+# 时间范围 : 2026-10-02T13:15:43.154Z .. 2026-10-02T17:56:48.748Z
+# 列: seq | ts(UTC) | tool | 入参 | 返回摘要
+====================================================================================================
+   40 | 2026-10-02T16:41:44.032Z | eeg_artifacts    |                                                                        | approval rejected
+   75 | 2026-10-02T16:52:50.472Z | eeg_artifacts    |                                                                        | approval rejected
+  109 | 2026-10-02T17:02:23.993Z | eeg_artifacts    | {"limit": 3}                                                           | approval rejected
+  163 | 2026-10-02T17:12:40.861Z | eeg_artifacts    | {"limit": 3}                                                           | ok=True n_summary=3
+  180 | 2026-10-02T17:12:42.463Z | eeg_artifacts    | {"limit": 3}                                                           | ok=True n_summary=3
+  217 | 2026-10-02T17:16:06.801Z | eeg_artifacts    | {"limit": 20}                                                          | ok=True n_summary=20
+  235 | 2026-10-02T17:16:12.560Z | eeg_artifacts    | {"limit": 100}                                                         | ok=True n_summary=100
+  253 | 2026-10-02T17:16:16.344Z | eeg_trial_run    | {"seed": 1, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2117a113ea12 sig=True p=0.0323 obs=0.55 n_eval=1
+  271 | 2026-10-02T17:16:20.957Z | eeg_trial_run    | {"seed": 2, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_7adb03da01a9 sig=True p=0.0323 obs=0.5676 n_eval=1
+  289 | 2026-10-02T17:16:25.324Z | eeg_trial_run    | {"seed": 3, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_be3fc9bca51b sig=False p=0.5484 obs=0.5074 n_eval=1
+  307 | 2026-10-02T17:16:30.042Z | eeg_trial_run    | {"seed": 4, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2d88c8cf95af sig=False p=0.2581 obs=0.516 n_eval=1
+  325 | 2026-10-02T17:16:34.777Z | eeg_trial_run    | {"seed": 5, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_022e9395f2d7 sig=False p=0.5484 obs=0.5002 n_eval=1
+  343 | 2026-10-02T17:16:39.242Z | eeg_trial_run    | {"seed": 6, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2f2a89a85b25 sig=False p=0.6129 obs=0.4854 n_eval=1
+  361 | 2026-10-02T17:16:44.529Z | eeg_trial_run    | {"seed": 7, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_dd97aac4fb2f sig=False p=0.8065 obs=0.4573 n_eval=1
+  379 | 2026-10-02T17:16:49.035Z | eeg_trial_run    | {"seed": 8, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_78b558773456 sig=False p=0.8387 obs=0.4562 n_eval=1
+  397 | 2026-10-02T17:16:59.660Z | eeg_trial_run    | {"seed": 9, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_c049acd5b92e sig=False p=0.6774 obs=0.4851 n_eval=1
+  415 | 2026-10-02T17:17:04.122Z | eeg_trial_run    | {"seed": 10, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_cdb73b157d24 sig=False p=0.5161 obs=0.5054 n_eval=1
+  433 | 2026-10-02T17:17:11.379Z | eeg_trial_run    | {"seed": 11, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_7b398734f7ca sig=False p=0.7742 obs=0.47 n_eval=1
+  451 | 2026-10-02T17:17:20.028Z | eeg_trial_run    | {"seed": 12, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_e1414aeeb761 sig=False p=0.7742 obs=0.4898 n_eval=1
+  469 | 2026-10-02T17:17:24.425Z | eeg_trial_run    | {"seed": 13, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_355d3f1a063f sig=False p=0.8387 obs=0.453 n_eval=1
+  487 | 2026-10-02T17:17:29.475Z | eeg_trial_run    | {"seed": 14, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_cdca91bbbcaf sig=False p=0.5806 obs=0.5023 n_eval=1
+  505 | 2026-10-02T17:17:33.682Z | eeg_trial_run    | {"seed": 15, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_846bff3f6fe1 sig=False p=0.3871 obs=0.5156 n_eval=1
+  522 | 2026-10-02T17:17:44.150Z | eeg_trial_run    | {"seed": 16, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_7b9221cc9d2d sig=False p=0.6774 obs=0.4841 n_eval=1
+  540 | 2026-10-02T17:17:56.095Z | eeg_trial_run    | {"seed": 17, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_672d20b94f47 sig=False p=0.2903 obs=0.5142 n_eval=1
+  558 | 2026-10-02T17:18:03.708Z | eeg_trial_run    | {"seed": 18, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2344850450dd sig=False p=0.6452 obs=0.4984 n_eval=1
+  576 | 2026-10-02T17:18:09.406Z | eeg_trial_run    | {"seed": 19, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_16ae69f88608 sig=False p=0.7742 obs=0.4627 n_eval=1
+  594 | 2026-10-02T17:18:13.919Z | eeg_trial_run    | {"seed": 20, "strategy": "hill", "budget": 1, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_6a0b1afb1c2b sig=False p=0.8387 obs=0.468 n_eval=1
+  612 | 2026-10-02T17:18:21.297Z | eeg_defect_rate  | {"trial_handles": "[20]"}                                              | n_trials=20 defect_rate=0.1 ci=[0.0279, 0.301] obs_mean=0.4944 median_p=0.629
+  654 | 2026-10-02T17:20:50.405Z | eeg_trial_run    | {"seed": 1, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_8f9b66895f75 sig=True p=0.0323 obs=0.55 n_eval=5
+  672 | 2026-10-02T17:20:56.546Z | eeg_trial_run    | {"seed": 2, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_dadbab309f0c sig=True p=0.0323 obs=0.5676 n_eval=5
+  690 | 2026-10-02T17:21:02.173Z | eeg_trial_run    | {"seed": 3, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_dffe8f681ffb sig=False p=0.3548 obs=0.5221 n_eval=4
+  708 | 2026-10-02T17:21:13.170Z | eeg_trial_run    | {"seed": 4, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_c764ea093287 sig=False p=0.129 obs=0.5254 n_eval=5
+  725 | 2026-10-02T17:21:18.866Z | eeg_trial_run    | {"seed": 5, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_5028fcd0be75 sig=False p=0.0645 obs=0.5674 n_eval=5
+  743 | 2026-10-02T17:21:24.341Z | eeg_trial_run    | {"seed": 6, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_c4e86a9ab7cf sig=False p=0.4194 obs=0.5025 n_eval=4
+  761 | 2026-10-02T17:21:29.628Z | eeg_trial_run    | {"seed": 7, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_a69e79dbdd67 sig=False p=0.6129 obs=0.4994 n_eval=5
+  779 | 2026-10-02T17:21:34.431Z | eeg_trial_run    | {"seed": 8, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_afafe7b2089c sig=False p=0.1613 obs=0.5252 n_eval=4
+  797 | 2026-10-02T17:21:49.436Z | eeg_trial_run    | {"seed": 9, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2ad64a4d0c04 sig=False p=0.1613 obs=0.5348 n_eval=5
+  815 | 2026-10-02T17:22:00.902Z | eeg_trial_run    | {"seed": 10, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_6be1bf01adb0 sig=False p=0.3871 obs=0.521 n_eval=5
+  833 | 2026-10-02T17:22:12.074Z | eeg_trial_run    | {"seed": 11, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_9bfed7fbce65 sig=False p=0.0968 obs=0.5366 n_eval=5
+  851 | 2026-10-02T17:22:27.003Z | eeg_trial_run    | {"seed": 12, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_e2274de919ed sig=False p=0.4194 obs=0.5115 n_eval=5
+  869 | 2026-10-02T17:22:33.489Z | eeg_trial_run    | {"seed": 13, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_a5723d05afbc sig=False p=0.3871 obs=0.5151 n_eval=5
+  887 | 2026-10-02T17:22:38.374Z | eeg_trial_run    | {"seed": 14, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_d3903c9721c0 sig=False p=0.0968 obs=0.5392 n_eval=4
+  904 | 2026-10-02T17:22:43.176Z | eeg_trial_run    | {"seed": 15, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_960e04818139 sig=True p=0.0323 obs=0.5553 n_eval=5
+  922 | 2026-10-02T17:23:01.070Z | eeg_trial_run    | {"seed": 16, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_8415979d1c32 sig=False p=0.0645 obs=0.5547 n_eval=5
+  939 | 2026-10-02T17:23:09.983Z | eeg_trial_run    | {"seed": 17, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_50e59c4fcb9e sig=False p=0.129 obs=0.5373 n_eval=5
+  957 | 2026-10-02T17:23:18.623Z | eeg_trial_run    | {"seed": 18, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2f5fc766dc69 sig=False p=0.1613 obs=0.5026 n_eval=5
+  975 | 2026-10-02T17:23:31.884Z | eeg_trial_run    | {"seed": 19, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_afcf928ed184 sig=False p=0.0968 obs=0.551 n_eval=5
+  993 | 2026-10-02T17:23:41.485Z | eeg_trial_run    | {"seed": 20, "strategy": "hill", "budget": 4, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_f7a3ca0b14b0 sig=True p=0.0323 obs=0.54 n_eval=5
+ 1011 | 2026-10-02T17:24:00.455Z | eeg_defect_rate  | {"trial_handles": "[20]"}                                              | n_trials=20 defect_rate=0.2 ci=[0.0807, 0.416] obs_mean=0.5329 median_p=0.129
+ 1053 | 2026-10-02T17:28:18.857Z | eeg_trial_run    | {"seed": 1, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_a433a12a5244 sig=True p=0.0323 obs=0.5816 n_eval=25
+ 1071 | 2026-10-02T17:28:55.606Z | eeg_trial_run    | {"seed": 2, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_b816a573523c sig=True p=0.0323 obs=0.5676 n_eval=25
+ 1089 | 2026-10-02T17:29:28.099Z | eeg_trial_run    | {"seed": 3, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_d845f695f058 sig=False p=0.0645 obs=0.5545 n_eval=25
+ 1107 | 2026-10-02T17:29:55.054Z | eeg_trial_run    | {"seed": 4, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_6e474a9aa704 sig=True p=0.0323 obs=0.5613 n_eval=25
+ 1125 | 2026-10-02T17:30:23.373Z | eeg_trial_run    | {"seed": 5, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_da073d11fe1e sig=False p=0.0645 obs=0.5674 n_eval=25
+ 1143 | 2026-10-02T17:30:59.189Z | eeg_trial_run    | {"seed": 6, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_d02dd5de6920 sig=False p=0.0968 obs=0.5268 n_eval=25
+ 1161 | 2026-10-02T17:31:35.503Z | eeg_trial_run    | {"seed": 7, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_be41fc3df59a sig=False p=0.0645 obs=0.5967 n_eval=25
+ 1179 | 2026-10-02T17:31:53.480Z | eeg_trial_run    | {"seed": 8, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_6c79fd3a3583 sig=True p=0.0323 obs=0.5554 n_eval=24
+ 1197 | 2026-10-02T17:32:44.825Z | eeg_trial_run    | {"seed": 9, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_8d27e398d1f3 sig=False p=0.2581 obs=0.5377 n_eval=25
+ 1215 | 2026-10-02T17:33:10.350Z | eeg_trial_run    | {"seed": 10, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_d85d6df8ad25 sig=False p=0.2258 obs=0.5251 n_eval=25
+ 1233 | 2026-10-02T17:33:40.467Z | eeg_trial_run    | {"seed": 11, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_48cae117f544 sig=True p=0.0323 obs=0.5658 n_eval=24
+ 1251 | 2026-10-02T17:34:21.722Z | eeg_trial_run    | {"seed": 12, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_67fe3aceabed sig=True p=0.0323 obs=0.5731 n_eval=24
+ 1269 | 2026-10-02T17:34:42.170Z | eeg_trial_run    | {"seed": 13, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2b30bb137eee sig=True p=0.0323 obs=0.6026 n_eval=25
+ 1287 | 2026-10-02T17:35:02.634Z | eeg_trial_run    | {"seed": 14, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_d9bdc2fe40ca sig=False p=0.0645 obs=0.5501 n_eval=25
+ 1305 | 2026-10-02T17:35:32.163Z | eeg_trial_run    | {"seed": 15, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_fb292f55e5c2 sig=True p=0.0323 obs=0.5665 n_eval=24
+ 1323 | 2026-10-02T17:36:18.086Z | eeg_trial_run    | {"seed": 16, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_206114846da0 sig=True p=0.0323 obs=0.5615 n_eval=24
+ 1341 | 2026-10-02T17:36:58.074Z | eeg_trial_run    | {"seed": 17, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_3182d88f8e57 sig=False p=0.0645 obs=0.556 n_eval=24
+ 1359 | 2026-10-02T17:37:47.072Z | eeg_trial_run    | {"seed": 18, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_3de8afb8ac09 sig=False p=0.129 obs=0.5597 n_eval=25
+ 1377 | 2026-10-02T17:38:27.449Z | eeg_trial_run    | {"seed": 19, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_2f8ef2eb459b sig=False p=0.0645 obs=0.5675 n_eval=25
+ 1395 | 2026-10-02T17:39:05.607Z | eeg_trial_run    | {"seed": 20, "strategy": "hill", "budget": 24, "n_perm": 30, "source_handle": "raw_057280305171"} | handle=eval_5e22724660be sig=True p=0.0323 obs=0.5554 n_eval=25
+ 1413 | 2026-10-02T17:39:40.029Z | eeg_defect_rate  | {"trial_handles": "[20]"}                                              | n_trials=20 defect_rate=0.5 ci=[0.2993, 0.7007] obs_mean=0.5616 median_p=0.0484

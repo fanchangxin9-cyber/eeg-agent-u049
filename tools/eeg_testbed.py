@@ -423,7 +423,6 @@ class Testbed:
         """把源 raw 复制进本试验台的目录（确定性 → 同一个 handle）。"""
         if self._staged:
             return self._staged
-        import eeg_pipeline as pipe  # 延迟导入，避免与 pipeline 循环依赖
         with cache_root_at(self._source_root):
             arrays, record = cache.get(self.source_raw)
         with cache_root_at(self._env_root):
@@ -579,7 +578,7 @@ def _pool_path(root: Path, source_raw: str) -> Path:
     return Path(root) / f"nullpool_{source_raw}.json"
 
 
-def null_pool(tb_: "Testbed", cfg: dict, *, n_perm: int = 30,
+def null_pool(tb_: Testbed, cfg: dict, *, n_perm: int = 30,
               seed_base: int = 500_000, source_raw: str | None = None) -> np.ndarray:
     """某个配置在零信号下的置换零分布。
 

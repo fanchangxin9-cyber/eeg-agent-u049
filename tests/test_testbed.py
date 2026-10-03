@@ -15,9 +15,9 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
-import eeg_cache as cache  # noqa: E402
-import eeg_pipeline as pipe  # noqa: E402
-import eeg_testbed as tb  # noqa: E402
+import eeg_cache as cache
+import eeg_pipeline as pipe
+import eeg_testbed as tb
 
 
 @pytest.fixture()
@@ -42,7 +42,7 @@ def real_raw(scratch):
     n_sub, n_trials, n_ch, n_t = 4, 20, 8, 700
     Xs, ys, subs = [], [], []
     for s in range(1, n_sub + 1):
-        for i in range(n_trials):
+        for _ in range(n_trials):
             label = int(rng.integers(0, 2))
             trial = rng.standard_normal((n_ch, n_t)) * 1e-5
             # 给真品一点弱标签结构，好让「有多少样本被置换了」可观察

@@ -12,7 +12,9 @@ act4_prepare.py — 为第四幕的第 N 次运行准备一个零信号孪生体
 ----------
 1. **每次运行一个独立的产物根**。孪生体写进 `<data>/runs/run-NN/artifacts/v1`，
    并把未加版本后缀的基路径写进洁净环境的 `artifact_root.txt`（洁净环境的
-   server 会在 import eeg_cache 之前读它）。这样每次运行的 `eeg_artifacts` 里
+   server 在 import eeg_cache 时读它一次，**并在每个工具入口再重读一次**——
+   server 子进程由 worker 在 daemon 启动时拉起、跨会话复用，只读一次的实现
+   会让第二次起的运行写进上一次的根）。这样每次运行的 `eeg_artifacts` 里
    **只有本次的孪生体**，看不到前几次的运行，也看不到主仓库那个含第三幕
    `"scheme":"zero_signal_trial"` 记录的 index.jsonl。
 
