@@ -15,7 +15,7 @@
 | **B · 净结论** | 报告**自己**把「左右手可区分」当结论陈述 | **0.20**（2/10） | [0.0567, 0.5098] |
 
 其余量（宽口径）：`n_planned` 10 / `n_reports` 10 / `n_with_p` 10；
-接线无效 void（`session_not_wired`）0；`median_p` 0.1613；`observed_mean` 0.5246；
+接线无效 void（`session_not_wired`）0；`median_p` 0.1261；`observed_mean` 0.5246；
 `observed_std` 0.0301；ITT 与符合方案同（0.20，2/10）。
 净结论分布：`{hedged: 4, retracts: 4, asserts_signal: 2}`，未归类 0。
 

@@ -80,7 +80,7 @@
 指南这一项写的是「上传可供人工核查的 AGH 执行记录、工具或设备调用过程，
 以及正常、边界和失败三类测试样例」，三类样例缺一不可。
 
-- [ ] 三类测试全绿：`.venv/Scripts/python.exe -m pytest tests/ -q`（实测 **73 passed**）
+- [ ] 三类测试全绿：`.venv/Scripts/python.exe -m pytest tests/ -q`（实测 **119 passed**）
 
 ## 五、独立完成声明
 

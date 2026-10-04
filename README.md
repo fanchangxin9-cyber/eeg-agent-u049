@@ -517,7 +517,7 @@ python -m venv .venv
 
 ### 3. 跑测试（不联网，秒级）
 
-三类测试样例对应参赛指南 §7 的硬要求（实测 **73 passed**）：
+三类测试样例对应参赛指南 §7 的硬要求（实测 **119 passed**）：
 
 ```bash
 .venv/Scripts/python.exe -m pytest tests/ -q
