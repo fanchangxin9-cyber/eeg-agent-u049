@@ -225,3 +225,153 @@ def test_非_raw_产物不能造孪生体(real_raw, scratch):
     with pytest.raises(cache.CacheError) as ei:
         tb.make_twin(clean, seed=1)
     assert ei.value.code == "E_BAD_INPUT_KIND"
+
+
+# ---------------------------------------------------------------- 试验装置的身份
+def test_试验台版本与分析链版本相互独立(real_raw, scratch):
+    """试验台改版不能动到 handle 配方——否则 docs 里所有 eval_* 会一起失效。
+
+    所以本模块有自己的版本号（进 meta / 缓存 / 汇总闸门），
+    而 `cache.code_version()` 只哈希分析链那三个文件。
+    """
+    v = tb.testbed_code_version()
+    assert len(v) == 12 and all(c in "0123456789abcdef" for c in v)
+    assert v != cache.code_version(), "两者必须独立，否则等于把试验台塞进了 handle 配方"
+
+
+def test_混合版本的批次被拒绝(real_raw, scratch):
+    """同一组参数在不同实现下给出过不同数字——混在一起的平均值没有意义。
+
+    实测背景：2026-10-01 与 2026-10-02 两批 `budget=24, hill, seed=1..8`
+    参数完全相同、观测值不同（中间修过本模块）。
+    """
+    def t(version, p):
+        return {"p_value": p, "observed": 0.56, "rank_of_chosen": 1,
+                "testbed_code_version": version}
+
+    # 两版混在一起 → 响亮失败，而不是给出一个数
+    with pytest.raises(cache.CacheError) as ei:
+        tb.defect_rate([t("aaaaaaaaaaaa", 0.01), t("bbbbbbbbbbbb", 0.5)])
+    assert ei.value.code == "E_MIXED_TESTBED_VERSION"
+
+    # 同版放行；老产物（无版本字段 → None）也算同一版，不能因此炸掉
+    assert tb.defect_rate([t("aaaaaaaaaaaa", 0.01), t("aaaaaaaaaaaa", 0.5)])["n_significant"] == 1
+    assert tb.defect_rate([t(None, 0.01), t(None, 0.5)])["n_significant"] == 1
+
+
+def test_零分布缓存版本不符即重算(real_raw, scratch):
+    """零分布缓存必须带版本：本模块一改，旧分布整份作废，绝不静默复用。"""
+    t = tb.Testbed(real_raw, scratch / "tb")
+    cfg = dict(tb.CONFIG_POOL[0])
+    t.prepare(pool=[cfg])
+
+    first = tb.null_pool(t, cfg, n_perm=3, source_raw=real_raw)
+    path = tb._pool_path(t.dir, real_raw)
+    stored = json.loads(path.read_text(encoding="utf-8"))
+    assert stored[tb._POOL_VERSION_KEY] == tb.testbed_code_version()
+
+    # 把版本改成别的、并把这一条的数值投毒 → 必须重算，不能把毒值当缓存命中
+    key = json.dumps(cfg, sort_keys=True)
+    stored[tb._POOL_VERSION_KEY] = "deadbeefdead"
+    stored[key] = [9.9] * 3
+    path.write_text(json.dumps(stored), encoding="utf-8")
+
+    again = tb.null_pool(t, cfg, n_perm=3, source_raw=real_raw)
+    assert not np.allclose(again, 9.9), "旧版本的缓存被当成命中——版本闸门失效"
+    assert np.allclose(again, first), "重算结果与同版首次计算不一致（应当确定性）"
+
+
+# ---------------------------------------------------------------- 单次试验（第三幕核心）
+#
+# 为什么补这一组（SEC-003）：`run_trial` 是第三幕 0.10 / 0.20 / 0.525 与全部
+# `eval_*` handle 的**唯一来源**，而在此之前它**一条测试都没有**。
+# 这里**刻意不断言具体数值**——那是数据决定的，写死只会变成"改测试让它过"。
+# 钉住的是**契约**：返回结构、产物真的落盘、句柄可用、布尔字段自洽。
+def test_run_trial_能跑通一次完整试验(real_raw, scratch):
+    res = tb.run_trial(real_raw, seed=1, budget=2, n_perm=3)
+
+    assert res["strategy"] == "hill"
+    assert res["n_perm"] == 3
+    assert 0.0 <= float(res["p_value"]) <= 1.0
+    assert isinstance(res["significant"], bool)
+    # significant 的定义必须是「p < alpha」，不能自相矛盾
+    assert res["significant"] == (float(res["p_value"]) < 0.05)
+
+    # 选中的配置必须来自搜索空间
+    assert res["chosen_config"] in tb.CONFIG_POOL
+    assert res["rank_of_chosen"] >= 1
+
+    # 产物真的落盘了，而且能被 describe（不是只返回了个字符串）
+    rec = cache.describe(res["artifact"])
+    assert rec["kind"] == "eval"
+    assert rec["meta"]["scheme"] == "zero_signal_trial"
+    assert rec["meta"]["testbed_code_version"] == tb.testbed_code_version()
+
+    # 孪生体存在，且不是源产物本身
+    assert res["twin_handle"] != real_raw
+    assert cache.exists(res["twin_handle"])
+
+
+def test_run_trial_拒绝孪生体的孪生体(real_raw, scratch):
+    """实测教训：把孪生体再传进去会让「被评分的数据」与「报告里写的 handle」对不上。
+
+    必须**响亮失败**，而不是悄悄再置换一次——否则溯源就断了。
+    """
+    twin = tb.make_twin(real_raw, seed=1)
+    with pytest.raises(ValueError, match="已经是零信号孪生体"):
+        tb.run_trial(twin, seed=1, budget=1, n_perm=2)
+
+
+# ---------------------------------------------------------------- handle 校验（SEC-002）
+#
+# 背景：`_prepared_path()` / `_pool_path()` 会把 handle 拼成**文件名**。
+# handle 里出现 `/` 就会逃出试验台目录——修复前 `null_pool(t, cfg,
+# source_raw="x/../../evil")` 会拼出 `nullpool_x/../../evil.json`。
+# `eeg_cache` 侧有白名单校验，试验台侧此前没有。
+BAD_HANDLES = [
+    "../evil",             # 直接穿越
+    "x/../../evil",        # 前缀 + 穿越（原始漏洞的形状）
+    "..\\..\\evil",        # 反斜杠版本（Windows）
+    "raw_NOTHEX00000",     # 含非十六进制字符
+    "raw_0123456789",      # 只有 10 位
+    "raw_0123456789abc",   # 13 位
+    "raw_057280305171 ",   # 尾随空格
+    "",                    # 空串
+]
+
+
+@pytest.mark.parametrize("bad", BAD_HANDLES)
+def test_非法_handle_在拼路径前就被拒(bad, scratch):
+    with pytest.raises(cache.CacheError) as ei:
+        tb.Testbed(bad, scratch / "tb_bad")
+    assert ei.value.code == "E_INVALID_HANDLE"
+    assert ei.value.recoverable is False
+
+
+def test_合法_handle_不被误拒(real_raw, scratch):
+    """校验不能误伤——合法 handle 必须照常可用。"""
+    t = tb.Testbed(real_raw, scratch / "tb_ok")
+    assert t.source_raw == real_raw
+
+
+def test_穿越_handle_不会落下任何文件(scratch, tmp_path):
+    """SEC-002 的回归测试：**证明原漏洞确实被堵上**。
+
+    修复前：`nullpool_x/../../evil.json` 会被写出去。
+    修复后：在 mkdir 之前就抛错，试验台目录与逃逸点**都不该出现**。
+    """
+    book = tmp_path / "book"
+    with pytest.raises(cache.CacheError):
+        tb.Testbed("x/../../escape", book)
+    assert not book.exists(), "校验应发生在 mkdir 之前"
+    assert not (tmp_path / "escape.json").exists(), "路径逃出了试验台目录"
+
+
+def test_null_pool_对显式传入的非法_source_raw_也拒绝(real_raw, scratch):
+    """第二道校验：`Testbed` 构造时合法，不代表后来显式传进来的那个也合法。"""
+    t = tb.Testbed(real_raw, scratch / "tb_np")
+    cfg = dict(tb.CONFIG_POOL[0])
+    t.prepare(pool=[cfg])
+    with pytest.raises(cache.CacheError) as ei:
+        tb.null_pool(t, cfg, n_perm=1, source_raw="../evil")
+    assert ei.value.code == "E_INVALID_HANDLE"

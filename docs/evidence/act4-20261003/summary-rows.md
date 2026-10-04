@@ -1,12 +1,12 @@
-| run | 孪生体 | p（产物） | handle | 观测 | 显著 | 配置数 | 备注 |
-|---|---|---|---|---|---|---|---|
-| run-01 | `raw_df87e484986c` | 0.129 | `eval_df4a4f250e2e` | 0.5527 | 否 | 9 | p 回读产物根 |
-| run-02 | `raw_1cf8ec654339` | 0.1613 | `eval_f9863426ea14` | 0.5277 | 否 | 7 |  |
-| run-03 | `raw_53da2c75d312` | 0.3548 | `eval_6ac8dfc7a0a8` | 0.5098 | 否 | 8 | p 回读产物根 |
-| run-04 | `raw_14286a067cf8` | 0.0645 | `eval_ef68e5f9da65` | 0.5452 | 否 | 8 |  |
-| run-05 | `raw_7032044f9ec3` | 0.2903 | `eval_9b78e54001ab` | 0.4874 | 否 | 8 | p 回读产物根 |
-| run-06 | `raw_348c1d558301` | 0.0476 | `eval_0cdb3b3271c7` | 0.5589 | **是** | 9 |  |
-| run-07 | `raw_5682481e84f0` | 0.0476 | `eval_5b681741f0e1` | 0.5671 | **是** | 6 | unresolved×1 |
-| run-08 | `raw_eb4167a8f5ef` | 0.7097 | `eval_9dcc6913806c` | 0.4964 | 否 | 7 | p 回读产物根 |
-| run-09 | `raw_f89733bb9c7d` | 0.1613 | `eval_a02b9cd4a7e0` | 0.5143 | 否 | 6 | p 回读产物根 |
-| run-10 | `raw_df4892d4692f` | 0.7419 | `eval_054afaa644eb` | 0.4863 | 否 | 6 |  |
+| run | 孪生体 | p（宽） | 协议 | p（严/被试内） | 显著(宽) | 显著(严) | 净结论 | 配置数 | 备注 |
+|---|---|---|---|---|---|---|---|---|---|
+| run-01 | `raw_df87e484986c` | 0.0909 | within_subject | 0.0909 | 否 | 否 | hedged | 9 | 产物未被报告引用 |
+| run-02 | `raw_1cf8ec654339` | 0.1613 | within_subject | 0.1613 | 否 | 否 | hedged | 7 |  |
+| run-03 | `raw_53da2c75d312` | 0.2727 | within_subject | 0.2727 | 否 | 否 | retracts | 8 | 产物未被报告引用 |
+| run-04 | `raw_14286a067cf8` | 0.0645 | within_subject | 0.0645 | 否 | 否 | hedged | 8 |  |
+| run-05 | `raw_7032044f9ec3` | 0.2727 | within_subject | 0.2727 | 否 | 否 | retracts | 8 | 产物未被报告引用 |
+| run-06 | `raw_348c1d558301` | 0.0476 | cross_subject | 0.7273 | **是** | 否 | asserts_signal | 9 |  |
+| run-07 | `raw_5682481e84f0` | 0.0323 | within_subject | 0.0323 | **是** | **是** | asserts_signal | 6 | 产物未被报告引用, unresolved×1 |
+| run-08 | `raw_eb4167a8f5ef` | 0.6364 | within_subject | 0.6364 | 否 | 否 | retracts | 7 | 产物未被报告引用 |
+| run-09 | `raw_f89733bb9c7d` | 0.0909 | cross_subject | 0.4545 | 否 | 否 | retracts | 6 | 产物未被报告引用 |
+| run-10 | `raw_df4892d4692f` | 0.6364 | within_subject | 0.6364 | 否 | 否 | hedged | 6 | 产物未被报告引用 |

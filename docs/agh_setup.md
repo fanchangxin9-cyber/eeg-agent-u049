@@ -3,8 +3,9 @@
 把本项目的 MCP 工具接进 Agnes Harness（AGH），并导出提交所需的执行记录。
 
 > 本文件按 **AGH 实际源码行为**编写（对照 `D:\AI-tools\agnes-harness-main`）。
-> AGH 当前是 pre-alpha，接口仍在演进；若与你的版本不符，以仓库内
-> `docs/guide/mcp.zh-CN.md` 与 `docs/guide/skills.zh-CN.md` 为准。
+> AGH 当前是 pre-alpha，接口仍在演进；若与你的版本不符，以 **AGH 仓库内**的
+> `docs/guide/mcp.zh-CN.md` 与 `docs/guide/skills.zh-CN.md` 为准
+> （**不是**本仓库的 `docs/`——本仓库没有 `guide/` 目录）。
 >
 > ⚠️ 本文件中所有指标数值一律留空，必须来自你自己的实际运行。
 > 赛事指南第十三节把「伪造实验数据、运行记录」列为取消资格情形。

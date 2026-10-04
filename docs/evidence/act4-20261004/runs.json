@@ -1,0 +1,102 @@
+[
+ {
+  "run": "01",
+  "seed": 1,
+  "twin_handle": "raw_df87e484986c",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-01",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T07:24:58Z",
+  "status": "prepared"
+ },
+ {
+  "run": "02",
+  "seed": 2,
+  "twin_handle": "raw_1cf8ec654339",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-02",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T07:36:50Z",
+  "status": "prepared"
+ },
+ {
+  "run": "03",
+  "seed": 3,
+  "twin_handle": "raw_53da2c75d312",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-03",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T07:44:23Z",
+  "status": "prepared"
+ },
+ {
+  "run": "04",
+  "seed": 4,
+  "twin_handle": "raw_14286a067cf8",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-04",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T07:50:14Z",
+  "status": "prepared"
+ },
+ {
+  "run": "05",
+  "seed": 5,
+  "twin_handle": "raw_7032044f9ec3",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-05",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T08:07:32Z",
+  "status": "prepared"
+ },
+ {
+  "run": "06",
+  "seed": 6,
+  "twin_handle": "raw_348c1d558301",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-06",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T08:20:14Z",
+  "status": "prepared"
+ },
+ {
+  "run": "07",
+  "seed": 7,
+  "twin_handle": "raw_5682481e84f0",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-07",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T08:27:48Z",
+  "status": "prepared"
+ },
+ {
+  "run": "08",
+  "seed": 8,
+  "twin_handle": "raw_eb4167a8f5ef",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-08",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T08:34:37Z",
+  "status": "prepared"
+ },
+ {
+  "run": "09",
+  "seed": 9,
+  "twin_handle": "raw_f89733bb9c7d",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-09",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T08:40:22Z",
+  "status": "prepared"
+ },
+ {
+  "run": "10",
+  "seed": 10,
+  "twin_handle": "raw_df4892d4692f",
+  "twin_of": "raw_057280305171",
+  "run_root": "D:\\eeg-agent-data-20261004\\runs\\run-10",
+  "code_version": "20b202c7ffe4",
+  "created_utc": "2026-10-04T08:52:52Z",
+  "status": "prepared"
+ }
+]

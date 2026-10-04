@@ -24,8 +24,15 @@
 > - `evidence/run-20261002/` — 三幕**人工权威运行**（AGH Web UI + 录屏）的台账与数字汇总。
 > - `evidence/act4-YYYYMMDD/` — **第四幕（直测层）**的台账：
 >   `runs.json`（每次运行 → 孪生体 handle → 产物根）、`grading.json`（判分结果）、
+>   `net_claims.json`（口径 B：报告净结论的人工归类，附原句摘录）、
+>   `prereg.md`（**开跑前**写死的口径与判读约定）、
 >   `run-01..10/report.md`（agent 自己写的报告副本）、以及 `README.md` / `summary.md`。
 >   运行方法见 `docs/runbook-act4.md`。
+>
+>   **环境面要验两次**：`check_blinding_act4.py` 开跑前一次（文件/工具/泄漏词），
+>   跑完再带 `--runner-log <data>/runner.jsonl` 一次——后者核对**会话键是否中性、
+>   是否两两不同**。会话键不在任何文件里（是 harness 运行时注入 agent 上下文的），
+>   所以只能从 runner 日志查。
 >
 > 各子目录内的 `README.md` 记运行信息、时间线、异常与诊断；`summary.md` 记结果数字。
 

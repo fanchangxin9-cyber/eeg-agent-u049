@@ -136,11 +136,16 @@ def test_正文声称显著_但无产物支撑_标_unsupported_number(scene):
 
 
 def test_有产物但与正文的_p_对不上_标_conflict(scene):
+    """正文写的 p 在这次运行的**任何**产物里都找不到——那这个数字没有产物支撑。
+
+    判据是「正文的 p 能否对上这次运行的某一条产物」，不是「能否对上被展示的那一条」：
+    agent 引用哪一批合并结果是它的自由，要判的是这个数字有没有出处。
+    """
     h = _put_perm_eval(scene["root"], scene["twin"], p=0.0323, obs=0.57)
     rep = scene["write_report"](f"正文写 p = 0.40，但引用的是 `{h}`。")
     r = grade_run(rep, scene["root"], scene["twin"], alpha=0.05)
     assert r["p_reported"] == 0.0323
-    assert r["grading_conflict"] == "p_reported_not_in_text"
+    assert r["grading_conflict"] == "report_p_not_in_artifacts"
 
 
 def test_合并检验优先于单批(scene):

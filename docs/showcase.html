@@ -792,7 +792,7 @@ footer::before{
 
         <p class="intro-summary">
           本项目用一个<strong>四幕实验</strong>回答它，每一幕都接着上一幕留下的问题，直到闭环：
-          <em>取证</em> → <em>反转</em> → <em>定量</em>（模拟器实测 <strong>0.525</strong>）→ <em>结案</em>（智能体本体实测 <strong>0.20</strong>）。
+          <em>取证</em> → <em>反转</em> → <em>定量</em>（模拟器实测 <strong>0.525</strong>）→ <em>结案</em>（智能体本体实测两批各 N=10：宽口径 <strong>0.20 / 0.40</strong>，同口径 <strong>0.10 / 0.30</strong>）。
           交付物不是「一个高准确率的分类器」，而是<strong>一个可复现的测量</strong>：把「先挑配置、再报未校正 p 值」这个动作的虚报率，
           从流程层一路测到智能体本体。
         </p>
@@ -840,7 +840,7 @@ footer::before{
           <p class="report-overview__summary lead">
             问题落成一句可测的话：<strong>「从一堆配置里挑最好的那个再报数」这个动作本身，会把噪声抬成多少「显著」？</strong>
             第一幕里，智能体交出一份完全可追溯的分析报告，宣称发现显著信号；第二幕它回头审自己，承认<em>配置是看到结果之后才挑的</em>；
-            第三幕把「挑」这个动作单独放进零信号试验台量出 <strong>0.525</strong>；第四幕把同一份零信号数据交给智能体本体，它自己报出 <strong>0.20</strong>。
+            第三幕把「挑」这个动作单独放进零信号试验台量出 <strong>0.525</strong>；第四幕把同一份零信号数据交给智能体本体，它报出了「显著」——两批各 10 次，<strong>同一批孪生体上跑两次，结论会翻转</strong>（10 个孪生体里 5 个至少被报过一次显著、只有 1 个两次都报）。
           </p>
 
           <div class="metric-row">
@@ -850,14 +850,14 @@ footer::before{
               <p class="metric__ctx">零信号数据上机械搜索报出「显著」的比例（budget=24，n=40）</p>
             </div>
             <div class="metric" data-i="02">
-              <p class="metric__value">0.20</p>
-              <p class="metric__label">智能体本体虚报率</p>
-              <p class="metric__ctx">同一份零信号数据交给 agent 本体跑正常提示词（N=10，2/10）</p>
+              <p class="metric__value">0.20<small> → </small>0.40</p>
+              <p class="metric__label">智能体本体虚报率（宽口径，两批各 N=10）</p>
+              <p class="metric__ctx">同一份零信号数据交给 agent 本体跑正常提示词；两批用<strong>同一批孪生体</strong>——10 个里 5 个至少被报过一次「显著」，只有 1 个两次都报</p>
             </div>
             <div class="metric" data-i="03">
               <p class="metric__value">0.05</p>
               <p class="metric__label">名义显著性水平</p>
-              <p class="metric__ctx">若流程干净，虚报率应在此附近；实测为它的 4–10 倍</p>
+              <p class="metric__ctx">若流程干净，虚报率应在此附近；第三幕三档实测为它的 2 / 4 / 10.5 倍</p>
             </div>
             <div class="metric" data-i="04">
               <p class="metric__value">0.10<small> → </small>0.20<small> → </small>0.525</p>
@@ -871,14 +871,16 @@ footer::before{
             <p>
               报告里的每个数字都有出处、可追溯到产物文件；可疑的不是数字造假，而是「<strong>先选配置、再报未校正 p 值</strong>」的选择偏差。
               零信号试验台实测：机械搜索在完全没有信号的数据上仍把虚报率抬到 <strong>0.525</strong>（远超名义 0.05）；
-              而把同一份零信号数据交给智能体本体、跑正常分析提示词，它自己的虚报率是 <strong>0.20</strong>，与模拟器 budget=4 档吻合。
+              而把同一份零信号数据交给智能体本体、跑正常分析提示词，它也报出了「显著」——两批各 N=10：宽口径 <strong>0.20 → 0.40</strong>、只认被试内协议 <strong>0.10 → 0.30</strong>。
+              <strong>N=10 只能定方向</strong>：两批的区间各自横跨模拟器的多个档，所以本项目<strong>不宣称</strong>两者「闭合」；
+              而且<strong>同一份数据上跑两次，「显著」会翻转</strong>——这才是最直接的证据。
             </p>
             <p><em>我们抓到的不是一个造假的数字，而是一个会让真数字说出假结论的动作。</em></p>
           </div>
 
           <figure class="figure">
             <p class="figure__title">图 1 · 四幕主线：每一幕都接着上一幕留下的问题</p>
-            <svg class="chart-svg chart-svg--timeline" viewBox="0 0 960 176" role="img" aria-label="四幕主线时间线：第一幕取证，把工具做出来，结果分析可追溯；第二幕反转，回头审自己，结果配置先挑后报；第三幕定量，零信号试验台，结果虚报率 0.525；第四幕结案，直测智能体本体，结果虚报率 0.20。">
+            <svg class="chart-svg chart-svg--timeline" viewBox="0 0 960 176" role="img" aria-label="四幕主线时间线：第一幕取证，把工具做出来，结果分析可追溯；第二幕反转，回头审自己，结果配置先挑后报；第三幕定量，零信号试验台，结果虚报率 0.525；第四幕结案，直测智能体本体，两批各 10 次，结果虚报率 0.20 到 0.40。">
               <!-- nodes -->
               <g>
                 <rect class="node-box" x="15" y="30" width="210" height="116" rx="12"/>
@@ -906,7 +908,7 @@ footer::before{
                 <text class="node-no" x="751" y="54">第四幕</text>
                 <text class="node-title" x="751" y="82">结案</text>
                 <text class="node-sub" x="751" y="105">直测智能体本体</text>
-                <text class="node-res" x="751" y="128">→ 虚报率 0.20</text>
+                <text class="node-res" x="751" y="128">→ 虚报率 0.20→0.40</text>
               </g>
               <!-- arrows -->
               <path class="arrow" d="M228 88 L246 88 M240 82 L246 88 L240 94"/>
@@ -1247,7 +1249,7 @@ footer::before{
             </p>
           </div>
 
-          <h3>两臂对比：偏差不依赖搜索的智能性</h3>
+          <h3>两臂对比：没测出差别</h3>
           <div class="figure">
             <p class="figure__title">表 4 · hill（爬山法）与 random（随机搜索）两臂各 20 次</p>
             <table class="data">
@@ -1267,7 +1269,7 @@ footer::before{
                 <tr><th scope="row" data-label="量">median_p</th><td class="num" data-label="A 臂 hill">0.0484</td><td class="num" data-label="B 臂 random">0.0323</td><td class="num" data-label="合并">0.0323</td></tr>
               </tbody>
             </table>
-            <p class="figure__cap">两臂 observed_mean 之差（hill − random）= <strong>+0.0008</strong>——无可辨别差别。</p>
+            <p class="figure__cap">两臂 observed_mean 之差（hill − random）= <strong>+0.0008</strong>——<strong>未检出</strong>差别（n=20/臂 检定力低，这是「没有证据表明有差别」，不是「证明无差别」）。</p>
           </div>
 
           <div class="callout callout--warn">
@@ -1275,7 +1277,7 @@ footer::before{
             <p>
               早期设计曾断言「爬山法的虚报率应高于随机搜索」，理由是随机搜索的抽样多落在烂配置上、分数天然偏低。
               <strong>实测不支持这个预设</strong>：零信号数据上所有配置的期望值都是 0.5、只有方差不同，根本不存在「系统性更差的配置」。
-              这反而是个更干净的结论——<strong>偏差不依赖搜索的智能性，纯粹来自「取 B 次抽样的最大值」这个动作</strong>。
+              这反而是个更干净的结论——<strong>有理由认为偏差不依赖搜索的智能性，而来自「取 B 次抽样的最大值」这个动作</strong>。依据有两层，强度不同：<strong>机制上</strong>零信号数据上所有配置期望值都是 0.5、没有结构可供自适应利用（推理，站得住）；<strong>实测上</strong>只是没测出差别（n=20/臂，检定力低，不足以单独支撑该断言）。
               一个纯随机搜索，只要跑够次数再挑最好，同样能造出「显著发现」。
             </p>
           </div>
@@ -1284,8 +1286,8 @@ footer::before{
             <p class="callout__label">这一层审的是流程，不是 agent</p>
             <p>
               0.525 来自一次「从 72 个配置里选 24 个」的搜索（<span class="handle">eeg_trial_run</span> 的 budget=24），它刻画的是<strong>试验台那次搜索</strong>的虚报率；
-              而第二幕里 agent 本体实际只对比了约 4 个配置，两者<strong>搜索规模不同，不能直接等同</strong>。
-              预算曲线补上了这个缺口：补测的 <strong>budget=4 那档（0.20）正是最贴近 agent 本体规模的参照</strong>。
+              而 agent 本体在第四幕里实际对比了 <strong>6–9 个配置</strong>、还会自选评估协议与置换次数，两者<strong>规模与自由度都不同，不能直接等同</strong>。
+              预算曲线给出的低规模端点是 budget=1（0.10）与 budget=4（0.20）——它们是可以并排看的参照，但<strong>不代表 agent 本体就落在哪一档</strong>。
             </p>
           </div>
 
@@ -1298,7 +1300,7 @@ footer::before{
         <!-- ================= ACT 4 ================= -->
         <section id="act4">
           <h2><span class="act-no">04</span>第四幕 · 结案</h2>
-          <p class="act-kicker">Conclusion · 直测层（真闭合）—— 回答第一幕留下的问题：如果那套分析跑在标签被打乱的同一批数据上，它还会报出 0.60 / p=0.03 吗？</p>
+          <p class="act-kicker">Conclusion · 直测层 —— 回答第一幕留下的问题：如果那套分析跑在标签被打乱的同一批数据上，它还会报出 0.60 / p=0.03 吗？</p>
 
           <h3>为什么要再做一层</h3>
           <p>
@@ -1399,8 +1401,9 @@ footer::before{
               <li><span class="swatch swatch--sig"></span>报出「显著」= 虚报（零信号数据上）</li>
             </ul>
             <figcaption class="figure__cap">
-              10 次里 2 次报出「显著」，虚报率 <strong>0.20</strong>（Wilson 95% CI [0.0567, 0.5098]，p 中位数 0.1613）。
-              显著的两条（run-06、run-07）p 均为 <strong>0.0476</strong>、观测 0.5589 / 0.5671，落在 0.05 交界处。
+              批1：10 次里 2 次报出「显著」，宽口径 <strong>0.20</strong>（[0.0567, 0.5098]），只认被试内协议则 <strong>0.10</strong>。
+              批2（修掉会话键泄漏后重跑，同一批孪生体）：宽口径 <strong>0.40</strong>（[0.1682, 0.6873]），同口径 <strong>0.30</strong>。
+              <strong>按孪生体对齐看：10 个孪生体里 5 个至少被报过一次「显著」，只有 1 个两次都报。</strong>
             </figcaption>
           </figure>
 
@@ -1452,11 +1455,18 @@ footer::before{
           </div>
 
           <div class="callout callout--key">
-            <p class="callout__label">真闭合</p>
+            <p class="callout__label">它确实报了</p>
             <p>
-              agent 本体的虚报率 <strong>0.20</strong>（2/10）落在第三幕模拟器 <strong>budget=4 档（0.20）</strong>上——「真闭合」成立。
+              agent 本体的虚报率（两批各 N=10，同一批孪生体）：宽口径 <strong>0.20 → 0.40</strong>，只认被试内协议 <strong>0.10 → 0.30</strong>。
               它回答的正是第一幕留下的问题：<strong>如果第一幕那套分析跑在标签被打乱的同一批数据上，它同样会报出「显著」。</strong>
               而这份数据的标签是被打乱的：里面没有任何信号。
+            </p>
+            <p>
+              <strong>但要小心别读成「闭合」：</strong>批2 宽口径 0.40 的 95% 区间 [0.1682, 0.6873] <strong>同时覆盖</strong>第三幕的
+              0.10 / 0.20 / 0.525；严口径 0.30 的 [0.1078, 0.6032] 同样横跨；批1 的 0.20 覆盖 0.10 与 0.20。
+              <strong>不同口径、不同批次各自都能「对上」不同的档——这恰好说明这种对上没有信息量。</strong>
+              而且两层的行动自由度不同——模拟器固定配置数与协议，agent 还会自选评估协议与置换次数。
+              所以本项目<strong>只宣称「agent 本体会在零信号数据上报出显著」，不宣称它与模拟器某一档等价</strong>。
             </p>
           </div>
 
@@ -1472,11 +1482,11 @@ footer::before{
               </thead>
               <tbody>
                 <tr><th scope="row" data-label="维度">被测对象</th><td data-label="第三幕">程序化搜索模拟器</td><td data-label="第四幕">agent 本体（实跑 P1）</td></tr>
-                <tr><th scope="row" data-label="维度">搜索规模</th><td data-label="第三幕">固定 budget 1 / 4 / 24</td><td data-label="第四幕">agent 自己决定（6–9 个配置）</td></tr>
-                <tr class="is-emph"><th scope="row" data-label="维度">虚报率</th><td data-label="第三幕">0.10 / 0.20 / 0.525</td><td data-label="第四幕"><strong>0.20</strong></td></tr>
+                <tr><th scope="row" data-label="维度">搜索规模</th><td data-label="第三幕">固定 budget 1 / 4 / 24</td><td data-label="第四幕">agent 自己决定（两批实际 4–14 个配置）</td></tr>
+                <tr class="is-emph"><th scope="row" data-label="维度">虚报率</th><td data-label="第三幕">0.10 / 0.20 / 0.525</td><td data-label="第四幕"><strong>0.20 → 0.40</strong>（宽）<br><strong>0.10 → 0.30</strong>（被试内）</td></tr>
               </tbody>
             </table>
-            <p class="figure__cap">两层的搜索规模不同，所以不能把 0.525 直接安到 agent 头上；能对撞的参照是 budget=4 那一档——两者都是 0.20。</p>
+            <p class="figure__cap">两层的协议、搜索规模与行动自由度都不同，所以不能把 0.525 直接安到 agent 头上。<strong>「对上了某一档」不能当作验证</strong>——不同口径、不同批次各自都能「对上」不同的档，这恰好说明这种对上没有信息量。<strong>最直接的一条证据是：两批用同一批孪生体，10 个里 5 个至少被报过一次「显著」，只有 1 个两次都报——数据没动，结论在两次之间来回摆。</strong></p>
           </div>
         </section>
 

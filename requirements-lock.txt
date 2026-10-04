@@ -14,7 +14,17 @@
 # 权威运行环境（与 docs/ 中数字对应）：
 #   生成日期  2026-10-04
 #   生成方式  .venv/Scripts/python.exe -m pip freeze
+#             **手工剔除了 pandas**（见下），其余逐行与 freeze 一致
 #   代码版本  20b202c7ffe4（三源文件 SHA-256 前 12 位，见 tools/eeg_cache.py）
+#
+# 关于被剔除的 pandas==3.0.6：
+#   本项目代码从不直接 import 它；实测把它**完全屏蔽**（import 抛 ImportError）后，
+#   sklearn 的 LDA + cross_val_predict、mne、真实 EDF 加载（45×64×673）、
+#   以及全部 108 项测试**均正常**。sklearn 在它存在时会顺手用一下，但并未把它
+#   声明为依赖（`importlib.metadata.requires('scikit-learn')` 里没有 pandas），
+#   mne 也只在 `[full]` 这类 extra 里才要求它。
+#   → 它对本项目是**纯冗余**：只会增加安装体积与供应链暴露面。
+#   若日后确有代码需要它，请连同本注释一起恢复。
 #
 # 注：本文件包含开发依赖（pytest / ruff），因此比 requirements.txt 更宽；
 # 参赛提交只需运行期依赖时可用 requirements.txt，复现数字请用本文件。
@@ -53,7 +63,6 @@ narwhals==2.26.0
 numpy==2.5.3
 opentelemetry-api==1.45.0
 packaging==26.3
-pandas==3.0.6
 pillow==12.3.0
 platformdirs==4.12.2
 pluggy==1.6.0

@@ -38,6 +38,7 @@ handle 可以做对照。
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import json
 import os
 import time
@@ -51,6 +52,38 @@ import eeg_cache as cache
 SCHEMES = ("within_subject", "within_subject_run")
 
 _MANIFEST_NAME = "manifest.jsonl"
+
+
+# ------------------------------------------------------------------ 版本归属
+#
+# 本模块的版本为什么不并进 `cache.code_version()`
+# ------------------------------------------------
+# `cache.code_version()` 哈希的是 eeg_pipeline / eeg_dataset / eeg_cache 三个文件，
+# **它们进 handle 配方**：往里加一个文件，全库既有 handle（包括 docs 里引用的每一个
+# `eval_*`）会一起失效——代价远大于收益。
+#
+# 但本模块是**试验装置**：搜索策略、孪生构造、置换模拟、虚报率汇总都住在这里。
+# 它一变，同一组参数就可能给出不同数字。实测教训：2026-10-01 与 2026-10-02 两批
+# `budget=24, hill, seed=1..8`，参数**完全相同**，观测值却不同（seed=1：
+# 0.5941 vs 0.5816）——因为中间修过本模块。两边 handle 不同（内容寻址没错），
+# 但**参数相同**，按参数分组就会把两批混成一批，且没有任何东西报警。
+#
+# 所以身份走三条不碰 handle 配方的路：
+#   1. 试验产物的 **meta** 里记 `testbed_code_version`（meta 不进配方 → 既有 handle 不动）
+#   2. 零分布缓存的**文件内容**带版本；版本不符即整份作废重算（不会静默复用旧分布）
+#   3. `defect_rate()` **拒绝**汇总混合版本的批次（响亮失败，不悄悄给出一个数）
+#
+# 孪生体本身不需要这个标记：它的 handle 由 `y` 的内容指纹决定，而 `y` 由
+# `permute_within_subject()`（本模块）产生——置换逻辑一变，handle 自动就变。
+# 另：孪生体的 meta/params 必须与真品**逐字节相同**（盲性），所以那里一个字都不能加。
+def testbed_code_version() -> str:
+    """本模块自身的内容哈希（前 12 位）。
+
+    见上方「版本归属」注释：它是试验装置的身份，与 `cache.code_version()`
+    （分析链的身份）平行，互不覆盖。
+    """
+    blob = Path(__file__).read_bytes()
+    return hashlib.sha256(blob).hexdigest()[:12]
 
 
 # ------------------------------------------------------------------ 旁路清单
@@ -120,10 +153,6 @@ def twin_truth(handle: str) -> dict | None:
 
 def is_twin(handle: str) -> bool:
     return twin_truth(handle) is not None
-
-
-def list_twins() -> list[dict]:
-    return _read_manifest()
 
 
 # ------------------------------------------------------------------ 目录切换
@@ -224,6 +253,7 @@ def make_twin(source_handle: str, seed: int, *,
         "source_raw": source_handle,
         "seed": int(seed),
         "scheme": scheme,
+        "testbed_code_version": testbed_code_version(),
         "n_permuted": int((y != y_twin).sum()),
         "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     })
@@ -346,6 +376,40 @@ def neighbors(cfg: dict, space: dict | None = None) -> list[dict]:
     return out
 
 
+# ------------------------------------------------------------------ handle 校验
+def _require_handle(value: object, what: str) -> str:
+    """把调用方给的 handle 在**拼进文件路径之前**就校验掉。
+
+    为什么需要它（SEC-002）
+    ---------------------
+    `_prepared_path()` 与 `_pool_path()` 会把 handle 拼成**文件名**：
+
+        f"prepared_{self.source_raw}.json"
+        f"nullpool_{source_raw}.json"
+
+    handle 里一旦出现 `/`，路径就会**逃出**试验台目录——例如
+    `source_raw = "x/../../evil"` 会拼出 `nullpool_x/../../evil.json`，
+    而 `_pool_path()` 的返回值既被读也被写。
+
+    `eeg_cache` 侧对 handle 有白名单校验（`HANDLE_RE`），**试验台侧此前没有**——
+    两处口径不一致本身就是缺口。
+
+    当前不可达：`run_trial` 会先经 `cache.get()` 校验并抛错，才轮到拼路径。
+    但把安全性建立在「调用顺序恰好正确」上是不牢靠的——**这就是纵深防御**。
+
+    错误码与 `eeg_cache._validate` 保持一致（`E_INVALID_HANDLE`），
+    所以对调用方而言**行为和以前一模一样**，只是失败得更早、更靠近边界。
+    """
+    if not isinstance(value, str) or not cache.HANDLE_RE.match(value):
+        raise cache.CacheError(
+            "E_INVALID_HANDLE",
+            f"{what} 不是合法的 handle：{value!r}。"
+            "应形如 'raw_1a2b3c4d5e6f'（类别_ + 12 位十六进制）。",
+            recoverable=False,
+        )
+    return value
+
+
 # ------------------------------------------------------------------ 试验台
 class Testbed:
     """在一组零信号孪生体上跑搜索，统计虚报率。
@@ -370,7 +434,8 @@ class Testbed:
         传 None 是刻意的：零信号对照实验的产物必须落在常规根里，
         `eeg_evidence` / `eeg_defect_rate` 才找得到它们，数字才进得了证据链。
         """
-        self.source_raw = source_raw
+        # 校验后再存：`self.source_raw` 会被 `_prepared_path()` 拼进文件名（SEC-002）
+        self.source_raw = _require_handle(source_raw, "source_raw")
         # 传给 cache_root_at 的值：None = 不改环境变量，用当前根
         self._env_root = Path(root) if root is not None else None
         # 自己的簿记文件（表示映射、零分布池）放哪
@@ -460,14 +525,6 @@ class Testbed:
         self._save_prepared()
 
     # ---------------------------------------------------------- 孪生体
-    def twin_raw(self, seed: int) -> str:
-        """raw 层孪生体 —— 给真人 agent 用。"""
-        return make_twin(self.staged_or_source(), seed,
-                         source_root=self._env_root, dest_root=self._env_root)
-
-    def staged_or_source(self) -> str:
-        return self._staged or self.source_raw
-
     def _representations(self, seed: int) -> tuple[dict, dict]:
         """把**全部**预计算表示重贴标签。搜索会横扫所有配置，所以需要全套。"""
         if not self._clean:
@@ -575,7 +632,18 @@ SEARCHERS = {"random": search_random, "hill": search_hill}
 
 # ------------------------------------------------------------------ 零分布池
 def _pool_path(root: Path, source_raw: str) -> Path:
+    """零分布缓存文件的路径。
+
+    **前置条件**：`source_raw` 必须是**已校验**的 handle。
+    这里把 handle 拼进文件名，若它含 `/` 就会逃出 `root`——所以两道校验
+    （`Testbed.__init__` 与 `null_pool`）都在**调用它之前**完成（SEC-002）。
+    本函数刻意不再重复校验：同一件事只在一处做，避免两份判断逻辑各自漂移。
+    """
     return Path(root) / f"nullpool_{source_raw}.json"
+
+
+# 零分布缓存里的版本标记。配置键都是 cfg 的 JSON（以 '{' 开头），不会撞上这个名字。
+_POOL_VERSION_KEY = "__testbed_code_version__"
 
 
 def null_pool(tb_: Testbed, cfg: dict, *, n_perm: int = 30,
@@ -589,14 +657,21 @@ def null_pool(tb_: Testbed, cfg: dict, *, n_perm: int = 30,
     因此它全局只需算一次，然后所有孪生体共用——这正是 N 能取到 100 的原因。
     没有这条性质，每个孪生都要为它选中的配置重算 30 次置换。
 
-    结果落地缓存（产物不可变，映射永久有效）。
+    结果落地缓存。**缓存带版本**：本模块一改，旧零分布整份作废、重算——
+    否则会静默复用一版别的代码算出来的分布，p 值就不可信了。
+    （重算是确定性的，所以同参数仍得同数字、同 handle；只是慢一次。）
     """
-    src = source_raw or tb_.source_raw
+    # 显式传进来的 source_raw 也可能来自调用方，拼路径前同样要校验（SEC-002）。
+    # tb_.source_raw 已在 Testbed.__init__ 里校验过，这里是第二道。
+    src = _require_handle(source_raw or tb_.source_raw, "source_raw")
     path = _pool_path(tb_.dir, src)
+    version = testbed_code_version()
     cache_store: dict = {}
     if path.exists():
         try:
             cache_store = json.loads(path.read_text(encoding="utf-8"))
+            if cache_store.get(_POOL_VERSION_KEY) != version:
+                cache_store = {}      # 旧版（或无版本标记）的池不可信，整份作废
         except json.JSONDecodeError:
             cache_store = {}
 
@@ -609,6 +684,7 @@ def null_pool(tb_: Testbed, cfg: dict, *, n_perm: int = 30,
         reps = tb_._representation_for(cfg, seed_base + i)   # 只重建该配置需要的那份
         vals.append(tb_.score(cfg, reps))
 
+    cache_store[_POOL_VERSION_KEY] = version
     cache_store[key] = [round(float(v), 6) for v in vals]
     path.write_text(json.dumps(cache_store, ensure_ascii=False), encoding="utf-8")
     return np.array(vals, dtype=float)
@@ -683,6 +759,10 @@ def run_trial(source_raw: str, seed: int, *, root: str | Path | None = None,
             {"null_distribution": pool.astype(np.float32)},
             {
                 "scheme": "zero_signal_trial",
+                # 试验装置的身份。**只在 meta 里**——meta 不进 handle 配方，
+                # 所以既有 handle 一个都不动；而它让「两批同参数、不同实现」
+                # 这件事从不可见变成可查、可拒（见 defect_rate）。
+                "testbed_code_version": testbed_code_version(),
                 "observed_balanced_accuracy": res["observed"],
                 "p_value": res["p_value"],
                 "metrics": {"balanced_accuracy_mean": res["observed"],
@@ -719,7 +799,22 @@ def defect_rate(trials: list[dict], *, alpha: float = 0.05) -> dict:
 
     「虚报率」= 在零信号数据上，这套流程报出「显著」的比例。
     所有"发现"都必然是假的——因为根本没有信号可被发现。
+
+    **拒绝混合批次**：若这批试验来自不同版本的试验台代码，直接报错而不是
+    给出一个数——同一组参数在不同实现下会给出不同数字，混在一起的平均值
+    没有意义。调用方（`eeg_defect_rate`）会把 `testbed_code_version` 传进来。
     """
+    versions = {t.get("testbed_code_version") for t in trials}
+    if len(versions) > 1:
+        raise cache.CacheError(
+            "E_MIXED_TESTBED_VERSION",
+            f"这批试验来自 {len(versions)} 个不同版本的试验台代码："
+            f"{sorted(str(v) for v in versions)}。"
+            "同一 (budget, strategy, seed, n_perm) 在不同版本下会给出不同数字"
+            "（试验装置本身改过），混在一起汇总得到的虚报率没有意义。"
+            "请只汇总同一版本的产物；跨版本时分开报告，并说明差异。",
+            recoverable=False,
+        )
     n = len(trials)
     k = sum(1 for t in trials if t["p_value"] < alpha)
     ps = sorted(t["p_value"] for t in trials)
@@ -728,6 +823,9 @@ def defect_rate(trials: list[dict], *, alpha: float = 0.05) -> dict:
     return {
         "n_trials": n,
         "n_significant": k,
+        # 这一批是哪个版本的试验装置产出的（全批唯一，否则上面已报错）。
+        # 老产物没有这个字段 → None，代表「加版本标记之前的那一版」。
+        "testbed_code_version": next(iter(versions), None),
         "defect_rate": round(p, 4),
         "wilson_ci95": list(wilson_ci(k, n)),
         "alpha": alpha,

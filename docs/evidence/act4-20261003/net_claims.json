@@ -1,0 +1,43 @@
+{
+ "_note": "口径 B：该次报告**自己**有没有把「左右手可区分」当结论陈述。人工逐份读过报告后归类，evidence 是从报告里摘的原句（可在 run-NN/report.md 里搜到）。取值只有 asserts_signal / hedged / retracts / unclear 四个。判分器（scripts/act4_grade.py）只透传，不改判；没填就是没填。",
+ "run-01": {
+  "net_claim": "hedged",
+  "evidence": "「不足以排除流程泄漏，结果应视为『提示性』而非『确证性』」（run-01/report.md §6.4）"
+ },
+ "run-02": {
+  "net_claim": "hedged",
+  "evidence": "「左右手部分被试可区分、整体接近随机」；「p > 0.05，未能显著高于随机」（run-02/report.md §4）"
+ },
+ "run-03": {
+  "net_claim": "retracts",
+  "evidence": "「运动想象左右手在群体水平上未能被有效区分」（run-03/report.md 最终结论）"
+ },
+ "run-04": {
+  "net_claim": "hedged",
+  "evidence": "「CSP+LDA 的被试内 0.545 在 6 被试集上未能达到 0.05 显著水平（p=0.0645），属于边缘」（run-04/report.md §4）"
+ },
+ "run-05": {
+  "net_claim": "retracts",
+  "evidence": "「左右手想象在本数据集上未证实可区分」（run-05/report.md 局限）"
+ },
+ "run-06": {
+  "net_claim": "asserts_signal",
+  "evidence": "「结论：p = 0.0476 < 0.05，结果在常规显著水平上高于随机，未发现流程泄漏迹象」（run-06/report.md §4.1）"
+ },
+ "run-07": {
+  "net_claim": "asserts_signal",
+  "evidence": "「within_subject 衡量……答案是能（0.5671，显著高于随机）」（run-07/report.md §2.3）"
+ },
+ "run-08": {
+  "net_claim": "retracts",
+  "evidence": "「增益是在『低于随机』的基线上取得的 +3 个百分点，不能解读为绝对能力，两组都未达显著」（run-08/report.md §5）"
+ },
+ "run-09": {
+  "net_claim": "retracts",
+  "evidence": "「within_subject p=0.4839、cross_subject p=0.1613，都远大于 0.05，结论『未达显著』是稳健的」（run-09/report.md §6）"
+ },
+ "run-10": {
+  "net_claim": "hedged",
+  "evidence": "「报告以『最佳配置』为主，但任何单点数字都应视为探索性结果而非确证」（run-10/report.md 局限）"
+ }
+}

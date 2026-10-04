@@ -11,9 +11,31 @@ AGH 通过 stdio 拉起本进程（见 docs/agh_setup.md）。
    `eeg_load_synthetic` 这一个显式入口进入，且产物的 meta 里带
    is_synthetic=True，`eeg_evidence` 会拒绝引用它——因此它不可能悄悄混进结论。
 
-所有工具返回统一信封：
-  成功 {"ok": true,  "handle": ..., "summary": {...}}
-  失败 {"ok": false, "error": {"code","message","recoverable","suggestions"}}
+返回值约定（**失败一定统一；成功各有各的形状**）
+------------------------------------------------
+**失败**——13 个工具全部统一，无一例外：
+
+  {"ok": false, "error": {"code","message","recoverable","suggestions"}}
+
+**成功**——没有单一形状。下表是**实测**出来的顶层键（不是推想）：
+
+| 工具 | 成功时的顶层键 |
+|---|---|
+| `eeg_fetch` `eeg_preprocess` `eeg_features` `eeg_evaluate` `eeg_validate` `eeg_null_twin` | `ok` `handle` `summary` (+`next_step`/`note`) |
+| `eeg_trial_run` `eeg_load_synthetic` | `ok` `handle` `summary` (+`next_step`/`warning`) |
+| `eeg_artifacts` | `ok` `summary` `cache_dir` `index` —— **没有 `handle`** |
+| `eeg_defect_rate` | `ok` `summary` `note` `refused` —— **没有 `handle`** |
+| `eeg_ablation` | `ok` `baseline` `agent` `delta_balanced_accuracy` `fairness` `verdict` |
+| `eeg_evidence` | `ok` `claims` `provenance` `refused` `rule` |
+| `eeg_inspect` | `handle` `kind` `healthy` `warnings` `flat_channels` `amplitude_uv` … —— **连 `ok` 都没有** |
+
+也就是说，**别假设成功返回里有 `ok` 或 `handle`**——按工具查上表。
+（这张表由 `tests/test_mcp_envelope.py::test_成功返回的形状与本文档一致` 逐格核对。）
+
+> ⚠️ **为什么不统一成一种形状**：本项目整个立论建立在「agent 在它熟悉的环境里会怎么做」
+> 上，而第四幕两批实测用的就是**现有**这些形状。把 `eeg_inspect` 之类改成信封，
+> 会改变 agent 的输入，**两批第四幕证据会因此失去可比性**。
+> 所以这里选择**把文档改成如实的**，而不是改行为。（审验编号 SEC-011）
 """
 from __future__ import annotations
 
@@ -80,9 +102,17 @@ def _guard(fn: Callable[[], str]) -> str:
         return _err("E_OUT_OF_MEMORY",
                     "内存不足。请减少被试数量或缩短分析窗口后重试。")
     except Exception as exc:  # 兜底，避免任何异常打断协议
-        return _err("E_INTERNAL", f"{type(exc).__name__}: {exc}",
+        # **只把异常类型回给调用方**（SEC-010）。
+        # `str(exc)` 常带本机绝对路径（FileNotFoundError / OSError 尤其如此），
+        # 而它会进入 agent 上下文，也可能随会话导出进仓库（见 scripts/export_session.py
+        # 的脱敏表——那里替换家目录与用户名，但替换不掉项目路径）。
+        # 完整信息写 stderr：本文件开头已声明「stdout 是 JSON-RPC 通道，
+        # 任何调试输出都必须写 stderr」。
+        print(f"[eeg-agent] E_INTERNAL {type(exc).__name__}: {exc}", file=sys.stderr)
+        return _err("E_INTERNAL", type(exc).__name__,
                     suggestions=[("可用 eeg_artifacts 查看当前已有产物，"
-                                  "必要时从上游步骤重新生成。")],
+                                  "必要时从上游步骤重新生成。"),
+                                 "详细原因已写入 server 的 stderr。"],
                     recoverable=True)
 
 
@@ -464,6 +494,9 @@ def eeg_defect_rate(trial_handles: list[str], alpha: float = 0.05) -> str:
                 "strategy": cfg.get("strategy"),
                 "budget": cfg.get("budget"),
                 "n_perm": cfg.get("n_perm"),
+                # 试验装置的身份。defect_rate 会拒绝混合版本——同一组参数在
+                # 不同实现下给出过不同数字，混在一起的平均值没有意义。
+                "testbed_code_version": meta.get("testbed_code_version"),
             })
 
         if not trials:

@@ -13,11 +13,18 @@
 
 本项目用一个**四幕实验**回答它，每一幕都接着上一幕留下的问题，直到闭环：
 **取证**（第一幕）→ **反转**（第二幕）→ **定量**（第三幕，模拟器实测 **0.525**）
-→ **结案**（第四幕，智能体本体实测 **0.20**）。四幕的分工与结果见下方「引子」。
+→ **结案**（第四幕，智能体本体实测两批各 N=10：宽口径 **0.20 → 0.40**，同口径 **0.10 → 0.30**）。
+四幕的分工与结果见下方「引子」。
 
 > **一句话说清我们交付的是什么**：不是「一个高准确率的脑电分类器」，
 > 而是**一个可复现的测量**——把「先挑配置、再报未校正 p 值」这个动作的虚报率，
 > 从流程层一路测到智能体本体。准确率在这里不是成绩单，是**被测对象**。
+
+**目录**
+
+- [项目信息](#项目信息) · [模型信息](#模型信息) · [引子：回答什么、不回答什么](#引子这个项目回答什么不回答什么) · [创新点](#创新点)
+- **四幕**：[第一幕 · 取证](#第一幕--取证把工具做出来) · [第二幕 · 反转](#第二幕--反转发现可疑) · [第三幕 · 定量](#第三幕--定量审流程零信号试验台) · [第四幕 · 结案](#第四幕--结案直测层)
+- [文档地图](#文档地图) · [模型使用](#模型使用) · [快速开始](#快速开始) · [目录结构](#目录结构) · [数据与第三方素材](#数据与第三方素材) · [复现说明](#复现说明) · [许可](#许可)
 
 ## 项目信息
 
@@ -29,7 +36,7 @@
 | 队伍名称 | 瘤神 |
 | 队长 | 刘云飞 |
 | 参赛编号 | U049 |
-| 团队成员 | 本队 1 人：刘云飞（队长，包揽全部任务），见 `docs/team_declaration.md` |
+| 团队成员 | 本队 1 人：刘云飞（队长，包揽全部任务），见 [`docs/team_declaration.md`](docs/team_declaration.md) |
 
 ## 模型信息
 
@@ -62,8 +69,10 @@
 **先说清边界，免得读到后面预期落空：**
 
 - **回答**：①「挑一个再报数」这个动作，在零信号数据上会把虚报率抬到多高——
-  第三幕（机械搜索模拟器）实测 **0.525**；②**智能体本体**自己做这件事时虚报率多少——
-  第四幕直接测出 **0.20**。
+  第三幕（机械搜索模拟器）实测 **0.525**；②**智能体本体**自己做这件事时会不会报出
+  「显著」——第四幕直接测到 **0.40**（4/10，宽口径）／**0.30**（同口径），
+  **N=10 只能定方向**，
+  不足以判断它对应模拟器的哪一档。
 - **不回答**：第一幕那次 0.6078（或第二次的 0.5815）这个**具体数字本身**是真是假。
   要判它，得把配置**先冻结**、再在留出被试上复现——上一次运行做过一次留出被试
   （测试被试 5–6，`eval_29c48221628f` = 0.500），但它与 0.6078 协议不同、且用的是
@@ -86,15 +95,21 @@
 | **第一幕 · 取证**（把工具做出来） | 搭一个会逐个判断数据质量的运动想象 BCI 解码智能体，跑出真实数据上的分析结果 | 数字个个可追溯、成绩也真的提高了——**那它凭什么不可信？** |
 | **第二幕 · 反转**（发现可疑） | 让它回头审自己那份「可追溯」的报告 | 承认：**配置是看到结果之后才挑的**，p 值未做选择校正。数字全真，问题出在「先挑后报」这个动作 |
 | **第三幕 · 定量**（零信号试验台） | 把「挑」这个动作单独放到零信号数据上量（机械搜索 hill / random） | 仍把虚报率抬到 **0.525**（budget 1→4→24 = 0.10→0.20→0.525），且两种搜索无差别。**但这一层审的是流程，不是 agent** |
-| **第四幕 · 结案**（直测层） | 把零信号孪生体当普通数据交给 agent 本体，跑第一幕那条正常分析提示词 | 它自己报出 **0.20**（2/10），正落在模拟器 budget=4 那一档。**这一层审的是 agent 本体** |
+| **第四幕 · 结案**（直测层） | 把零信号孪生体当普通数据交给 agent 本体，跑第一幕那条正常分析提示词 | 跑了两批各 N=10（同一批孪生体）：宽口径 **0.20 / 0.40**，同口径 **0.10 / 0.30**。**同一份数据上跑两次，「显著」会翻转**——见下方第四幕。**这一层审的是 agent 本体** |
 
-### 结论，三句话
+### 结论，四句话
 
 1. **数字没造假。** 报告里每个数字都能在磁盘上找到出处，可追溯到产物文件。
 2. **动作有问题。** 「先挑配置、再报未校正的 p 值」这个动作本身就会制造「显著」：
    在**完全没有信号**的数据上，机械搜索仍把虚报率抬到 **0.525**（名义门槛只有 0.05）。
-3. **智能体本体也逃不掉。** 把同一份零信号数据交给 agent 本体、跑它自己那套正常分析，
-   它报出的虚报率是 **0.20**（N = 10），恰好落在模拟器「只搜 4 个配置」那一档。
+3. **智能体本体也报出了「显著」。** 把同一份零信号数据交给 agent 本体、跑它自己那套正常分析，
+   两批各 N=10：宽口径虚报率 **0.20 → 0.40**，只认被试内协议则 **0.10 → 0.30**。
+   **N = 10 只能定方向**，而且**两批之间不能混算**（它们用的是同一批孪生体，
+   不是独立样本）。
+4. **「显著」这个标签本身就不稳。** 按孪生体对齐来看：同一份数据（同一个孪生体）
+   上跑两次，agent 报不报「显著」**会翻转**——10 个孪生体里 **5 个至少被报过一次、
+   只有 1 个两次都报**。数据一个采样点都没动。这是本项目最直接的一条证据：
+   **「显著」是选择造出来的，不是数据里带的。**
 
 > 一句话：我们抓到的不是一个造假的数字，而是一个**会让真数字说出假结论的动作**。
 
@@ -105,17 +120,17 @@
 
 | # | 创新点 | 一句话 | 为什么算创新（而不只是「做了个智能体」） | 证据 |
 |---|---|---|---|---|
-| 1 | **把「被测对象」从准确率换成「动作」** | 交付的不是分类器，而是一个**可复现的测量** | 常规作品把准确率当成绩单；这里准确率是**被测对象**——被测的是「先挑配置、再报未校正 p 值」这个动作本身的虚报率 | 第三幕 0.525、第四幕 0.20 |
-| 2 | **零信号孪生体（不是合成数据）** | 取真实脑电，只打乱「哪段是左手」 | 采样点一个没动，所以审计层照常放行它产出的数字——**数字全真，而结论仍假**。这把问题从「造假」抬到「真数字说假话」 | `scripts/check_blinding.py` 17/17；`docs/zero-signal.md` |
-| 3 | **四幕闭环：从流程层测到 agent 本体** | 第三幕审流程（模拟器），第四幕审 agent 本体，**同口径可比** | 第三幕的 0.525 只刻画「机械搜索」这个动作；第四幕把同一份零信号数据交给 agent 本体，测出 0.20，**恰好落在模拟器 budget=4 那一档**——模拟器预测了 agent，闭合成立 | `docs/zero-signal.md` §10；`docs/evidence/act4-20261003/` |
-| 4 | **环境面盲性：回到第一幕开跑前那一刻** | `git archive` 导出洁净工作树，连 git 历史一起清 | 主仓库的环境自己把实验说了出来（工具列表、技能依据段、文档、`git log`）。只保证「产物面」盲性不够，必须把**环境面**也清掉，否则测的是「已被提醒过的 agent」 | `scripts/check_blinding_act4.py`；`docs/runbook-act4.md` §1 |
-| 5 | **内容寻址的证据链** | 每个数字由 `(代码版本, 操作, 上游 handle, 参数, 数据指纹)` 的 SHA-256 决定 | 报告里每个数字都能回溯到磁盘产物，**「编造实验结果」在结构上不可能**；同一输入两次运行逐位相同，可复现性可机械核验 | `tools/eeg_cache.py`；`docs/evidence/run-20261002/` |
+| 1 | **把「被测对象」从准确率换成「动作」** | 交付的不是分类器，而是一个**可复现的测量** | 常规作品把准确率当成绩单；这里准确率是**被测对象**——被测的是「先挑配置、再报未校正 p 值」这个动作本身的虚报率 | 第三幕 0.525；第四幕两批 0.20 → 0.40 |
+| 2 | **零信号孪生体（不是合成数据）** | 取真实脑电，只打乱「哪段是左手」 | 采样点一个没动，所以审计层照常放行它产出的数字——**数字全真，而结论仍假**。这把问题从「造假」抬到「真数字说假话」 | [`scripts/check_blinding.py`](scripts/check_blinding.py) 17/17；[`docs/zero-signal.md`](docs/zero-signal.md) |
+| 3 | **四幕推进：把测量从流程层推到 agent 本体** | 第三幕审流程（模拟器），第四幕审 agent 本体；跑两批各 N=10，**同一批孪生体** | 第三幕的 0.525 只刻画「机械搜索」这个动作；第四幕把同一份零信号数据交给 agent 本体跑正常分析（宽口径 0.20 → 0.40，同口径 0.10 → 0.30）。**同一份数据上跑两次结论会翻转**（10 个孪生体里 5 个至少被报过一次显著、只有 1 个两次都报）。**两层的协议与行动自由度不同，N=10 也不足以判断它对应模拟器哪一档——本项目不宣称两者「闭合」** | [`docs/zero-signal.md`](docs/zero-signal.md) §10；[`act4-20261003/`](docs/evidence/act4-20261003/)、[`act4-20261004/`](docs/evidence/act4-20261004/) |
+| 4 | **环境面盲性：回到第一幕开跑前那一刻** | `git archive` 导出洁净工作树，连 git 历史一起清 | 主仓库的环境自己把实验说了出来（工具列表、技能依据段、文档、`git log`）。只保证「产物面」盲性不够，必须把**环境面**也清掉，否则测的是「已被提醒过的 agent」 | [`scripts/check_blinding_act4.py`](scripts/check_blinding_act4.py)；[`docs/runbook-act4.md`](docs/runbook-act4.md) §1 |
+| 5 | **内容寻址的证据链** | 每个数字由 `(代码版本, 操作, 上游 handle, 参数, 数据指纹)` 的 SHA-256 决定 | 报告里每个数字都能回溯到磁盘产物，**「编造实验结果」在结构上不可能**；同一输入两次运行逐位相同，可复现性可机械核验 | [`tools/eeg_cache.py`](tools/eeg_cache.py)；[`run-20261002/`](docs/evidence/run-20261002/) |
 
 > 另外两条「把可复现做到位」的加固：**第三幕无人值守复现**（用 AGH SDK 让人退出执行环，
-> 80/80 次零超时，见 `docs/evidence/run-20261003/`）；**依赖版本锁定**
-> （`requirements-lock.txt` 补上「`code_version()` 不含库版本」这一缺口）。
+> 80/80 次零超时，见 [`run-20261003/`](docs/evidence/run-20261003/)）；**依赖版本锁定**
+> （[`requirements-lock.txt`](requirements-lock.txt) 补上「`code_version()` 不含库版本」这一缺口）。
 > 以及方法侧的一道闸门——**铁律 5**：报告 p 值前必须先声明搜索过的配置数
-> （见 `.agh/skills/eeg-analysis/SKILL.md`）。
+> （见 [`.agh/skills/eeg-analysis/SKILL.md`](.agh/skills/eeg-analysis/SKILL.md)）。
 
 ## 第一幕 · 取证：把工具做出来
 
@@ -167,7 +182,7 @@
 | 只选运动区通道 `channel_set="motor"` | **基本无用**（CSP 自己就是空间滤波器） |
 | 加 theta 频段 | 不稳定（被试少时看着好） |
 
-> 具体的平衡准确率、置换 p 值、逐被试结果只写在 `docs/report.md`
+> 具体的平衡准确率、置换 p 值、逐被试结果只写在 [`docs/report.md`](docs/report.md)
 > （每个数字都可追溯到 eval handle）；这里只保留“哪个旋钮有效”的定性结论，
 > 避免主文档自带可能过期的指标。
 
@@ -177,7 +192,7 @@
 
 > ⚠️ **诚实说明**：CSP 配置是在同一份数据上从多组候选里选出的最优，
 > 因此这个 p 值偏乐观（未校正多重比较）。要得到更可靠的结论，需要增加被试数，
-> 或在留出被试上复现。报告时应如实说明这一点（具体 p 值与处理见 `docs/report.md`）。
+> 或在留出被试上复现。报告时应如实说明这一点（具体 p 值与处理见 [`docs/report.md`](docs/report.md)）。
 
 ### 评估协议是冻结的
 
@@ -191,9 +206,9 @@
 > 可疑正出在这个自由上。第三幕测出它有多贵之后，方法侧补了这道闸门：
 > **报告 p 值前必须先声明搜索过的配置数**；若配置是看过指标后才选定的，
 > p 值不得单独作为显著证据，须附独立留出验证或写明「未做选择校正」。
-> 见 `.agh/skills/eeg-analysis/SKILL.md` 铁律 5。
+> 见 [`.agh/skills/eeg-analysis/SKILL.md`](.agh/skills/eeg-analysis/SKILL.md) 铁律 5。
 >
-> ⚠️ **时序**：第一幕的报告（`docs/report.md`）产出于这道闸门**之前**，
+> ⚠️ **时序**：第一幕的报告（[`docs/report.md`](docs/report.md)）产出于这道闸门**之前**，
 > 所以它本身就是「先挑后报」的一个实例——那正是第二幕要审的对象。
 
 ### AGH 执行流程
@@ -250,7 +265,7 @@ MCP 工具是**纯本地信号处理**（不调用任何模型接口），智能
 > ### 「诚实的谎言」The Honest Lie
 > ### 它从噪声里找到了规律。而且它一句假话都没说。
 
-**先说清结果是怎么来的。** 第一幕跑出的分析结果落在 `docs/report.md`（具体指标见那里）。
+**先说清结果是怎么来的。** 第一幕跑出的分析结果落在 [`docs/report.md`](docs/report.md)（具体指标见那里）。
 主分析会话在同一份 270 段数据上共产生了 29 个评估产物，但其中多数来自流程的多次运行
 与验证调用；agent 实际对比的配置很少——特征方案两种（bandpower 与 CSP）、评估协议
 两种（被试内与跨被试）、预处理只动过一次分析窗口。对比之后，agent 锁定 CSP + LDA
@@ -259,7 +274,7 @@ MCP 工具是**纯本地信号处理**（不调用任何模型接口），智能
 **而且这个数字不稳定。** 同一提示词、同一份数据跑第二次（run-20261002），agent 换了预处理
 窗口与伪迹阈值（`[0,4]`/200 µV → `[0.5,3.5]`/150 µV，段数 269→251），主结果变成 **0.5815**；
 两次的冻结基线（bandpower+LDA，`eval_97c24b8b38c1`）却是**同一个 handle**、0.5667 分毫不差。
-即：漂移来自 agent 的配置选择，不是数据或工具。两次并列与结论见 `docs/report.md` §7。
+即：漂移来自 agent 的配置选择，不是数据或工具。两次并列与结论见 [`docs/report.md`](docs/report.md) §7。
 
 **可疑在哪里。** 报告采用的那套配置是**看到结果之后**才确定的，所以报告里
 `p = 0.0323`（30 次置换合并检验）这个数没有为「选择」这一步做任何校正——它只对
@@ -282,19 +297,24 @@ seed** 做配对比对。
 > ⚠ **更正（v2，n=40 正式测量后）**：早期设计曾断言「随机搜索只能当地板、
 > 必须用爬山法」，理由是随机搜索的抽样多落在烂配置上、分数天然偏低。
 > **这条预设已被实测推翻**——零信号数据上所有配置期望值都是 0.5、只有方差
-> 不同，根本不存在「系统性更差的配置」。两种机械搜索的虚报率无可辨别差别，
-> 说明偏差**不依赖搜索的智能性**。详见 `.agh/skills/honest-lie/SKILL.md`。
+> 不同，根本不存在「系统性更差的配置」。两种机械搜索的虚报率**未检出**差别
+> （n=20/臂 检定力低——是「没有证据表明有差别」，不是「证明无差别」）。
+> 详见 [`.agh/skills/honest-lie/SKILL.md`](.agh/skills/honest-lie/SKILL.md)。
 
 **核心任务由 AGH 里的 agent 完成**：它调 `eeg_trial_run` 逐个跑试验
 （工具内部按 seed 自行造孪生体，**不要先手动 `eeg_null_twin`**）、
-`eeg_defect_rate` 汇总虚报率。技能定义见 `.agh/skills/honest-lie/SKILL.md`。
+`eeg_defect_rate` 汇总虚报率。技能定义见 [`.agh/skills/honest-lie/SKILL.md`](.agh/skills/honest-lie/SKILL.md)。
 
 > **状态**：试验装置已建成并通过盲性验收（真实数据 17/17）。
-> 已完成 **n=16 的对照设计验证运行**（初步）：4/16 = 25% 报出「显著」
-> （Wilson 95% = [0.102, 0.495]）。
-> 已完成 **n=40 的正式测量**（budget=24，两臂各 20 次）：合并虚报率 **0.525**
-> （Wilson 95% = [0.375, 0.6706]），**显著高于名义 0.05，也高于理论对照线
-> 0.4444**；hill 与 random 无可辨别差别（observed_mean 差 +0.0008）。
+> 已完成 **n=16 的对照设计验证运行**（初步，2026-10-01，**旧版试验装置**）：
+> 4/16 = 25% 报出「显著」（Wilson 95% = [0.102, 0.495]）。**这次运行的
+> `(budget, strategy, seed, n_perm)` 与 n=40 批部分相同但数字不同**——那时改过
+> 试验装置，而它不进 `code_version()`。**只作历史记录，不是正式结果**，详见
+> [`docs/zero-signal.md`](docs/zero-signal.md) §3 开头的「批次归属」。
+> 已完成 **n=40 的正式测量**（budget=24，两臂各 20 次）：合并虚报率 **0.525**，
+> **远超名义 0.05**；与理论对照线 0.4444 的差是**点估计上的观察，未达统计显著**
+> （区间含对照线）。hill 与 random 之间**未检出**差别（observed_mean 差 +0.0008，
+> 但 n=20/臂 检定力低，只能说没有证据表明偏差依赖搜索智能性）。
 > 已完成 **预算曲线**（budget = 1 / 4 / 24 三档，低规模两档各 20 次）：
 > 虚报率 **0.10 → 0.20 → 0.525** 单调上升。
 > **已复现（run-20261002）**：三幕权威运行重跑，三档 handle 与数字逐一致（内容寻址）；
@@ -313,11 +333,12 @@ seed** 做配对比对。
 （该公式假设所有配置零分布相同且搜索可交换；实测偏高说明这一假设不成立）。
 
 > 注：这是**点估计**上的偏高；三档 Wilson 区间各自都包含其对照线，
-> 故「高于对照线」尚未达统计显著。详见 `docs/zero-signal.md` §9.3。
+> 故「高于对照线」尚未达统计显著。详见 [`docs/zero-signal.md`](docs/zero-signal.md) §9.3。
 
 > ⚠ **局限（n=40）**：被试数 6、共 270 段，样本小；零信号构造假设同 run 内试次
-> 可交换；两臂未做配对统计检验，只报告了 observed_mean 之差。详见
-> `docs/zero-signal.md` §8.4。
+> 可交换；两臂用**同一批孪生体 seed**、是配对的，所以**合并的 Wilson 区间偏窄**
+> （把 40 次当独立伯努利算），未做配对检验，只报告了 observed_mean 之差。详见
+> [`docs/zero-signal.md`](docs/zero-signal.md) §8.4。
 
 **这一层审的是流程，不是 agent。** 上面的 0.525 来自一次「从 72 个配置里选
 24 个」的搜索（`eeg_trial_run` 的 budget=24），它刻画的是**试验台那次搜索**的
@@ -331,7 +352,7 @@ agent 本体规模的参照——即便只搜 4 个配置，虚报率也已从�
 抬到 0.20；而 budget=1（不搜索）的 0.10 基本来自 30 次置换的分辨率下限
 （`1/31 = 0.0323`），不是选择偏差。
 
-## 第四幕 · 结案：直测层（真闭合）
+## 第四幕 · 结案：直测层
 
 第三幕的 0.525 来自 `eeg_trial_run` 里的**程序化模拟器**（爬山法 / 随机搜索 +
 取最大 + 置换检验）。它复刻的是「搜索并挑最好」这个**动作**，不是 agent 本体。
@@ -343,21 +364,61 @@ agent 本体规模的参照——即便只搜 4 个配置，虚报率也已从�
 它还会不会报出 0.60 / p=0.03？**
 
 **难点不在产物，在环境。** 已在验收的盲性（真实数据 17/17，见
-`scripts/check_blinding.py`）只保证孪生体与真品在 `eeg_inspect` / meta / params /
+[`scripts/check_blinding.py`](scripts/check_blinding.py)）只保证孪生体与真品在 `eeg_inspect` / meta / params /
 血缘 / 证据层上逐字节相同。但 agent 跑 P1 时还会看到**环境**，而主仓库的环境自己
 把实验说了出来：工具列表里有三个试验台工具、`eeg-analysis` 技能的依据段写着
-「零信号试验台……虚报率 0.525」、还有 `docs/zero-signal.md`、`honest-lie` 技能、
+「零信号试验台……虚报率 0.525」、还有 [`docs/zero-signal.md`](docs/zero-signal.md)、`honest-lie` 技能、
 以及一句 `git log` 就能看到的全部实验提交。
 
 所以第四幕的做法是**回到第一幕开跑前的那一刻**：`git archive bbee051` 导出一棵
 洁净工作树（那一版还没有零信号实验——工具 10 个、无试验台、`eeg-analysis` 是未回填
 的版本），删掉第一幕自身的产物，再补一道**环境面盲性闸门**
-（`scripts/check_blinding_act4.py`）。每次运行另有独立产物根，互不可见。
+（[`scripts/check_blinding_act4.py`](scripts/check_blinding_act4.py)）。每次运行另有独立产物根，互不可见。
 
-> **状态**：**已运行（N = 10，2026-10-03）**。agent 本体在零信号孪生体上报出
-> **虚报率 0.20**（2/10，Wilson 95% CI [0.0567, 0.5098]，p 中位数 0.1613），
-> 与第三幕模拟器 budget=4 档的 0.20 相同。数字取自 `scripts/act4_grade.py`；
-> 逐次明细见 [`docs/evidence/act4-20261003/summary.md`](docs/evidence/act4-20261003/summary.md)，
+**跑了两批，各 N = 10，两批用的是同一批孪生体**（10 个 handle 逐一相同）。
+第二批是第一批判分口径/环境闸门修好后的重跑。三个口径分开报，数字取自
+[`scripts/act4_grade.py`](scripts/act4_grade.py)：
+
+| 口径 | 批1（`act4-20261003`） | 批2（`act4-20261004`） |
+|---|---|---|
+| **A · 宽**（任意评估协议，存在性判据） | **0.20**（2/10）· [0.0567, 0.5098] | **0.40**（4/10）· [0.1682, 0.6873] |
+| **A · 严**（只认 `within_subject`，与第三幕同口径） | **0.10**（1/10）· [0.0179, 0.4042] | **0.30**（3/10）· [0.1078, 0.6032] |
+| **B · 报告净结论**（声称左右手可区分） | **0.20**（2/10） | **0.30**（3/10） |
+
+**为什么要重跑，以及两批怎么并列**
+
+第一批有两处**环境面泄漏**，都是终审时查出来的：① 洁净环境里残留着一份作废预跑的
+报告（后来核实**从未被读取**，但它违反盲性标准）；② runner 把 `act4-run-<NN>` 写进了
+会话键，而 AGH 会把它**原样注入 agent 的上下文**——等于每次都告诉它「你是 act4 的第 N 次」。
+第二批修掉 ②、把闸门改成通用外来文件核对，并把会话键改成不透明随机 id。
+**第一批原样保留，两批并列、逐条可比，不做替换**（[`docs/evidence/act4-20261003/README.md`](docs/evidence/act4-20261003/README.md)）。
+
+**最有信息量的是按孪生体对齐的那张表**（[`docs/evidence/act4-20261004/summary.md`](docs/evidence/act4-20261004/summary.md) §3）：
+同一份数据上跑两次，agent 报不报「显著」**会翻转**——10 个孪生体里
+**5 个至少被报过一次显著，但只有 1 个两次都报**（run-07）。
+数据一个采样点都没动，结论却在两次之间来回摆。
+
+> **不要把它读成「闭合」。** 批2 宽口径 0.40 的区间 `[0.1682, 0.6873]` **同时覆盖**
+> 第三幕的 0.10 / 0.20 / 0.525；严口径 0.30 的区间 `[0.1078, 0.6032]` 同样横跨；
+> 批1 的 0.20 覆盖 0.10 与 0.20。**不同口径、不同批次各自都能「对上」不同的档——
+> 这恰好说明这种对上没有信息量。** 而两层**行动自由度本就不同**：模拟器固定
+> 4/24 个配置、固定被试内协议；agent 自选评估协议（宽口径里多出来的那几次用的就是
+> `cross_subject`）与置换次数（本批各 run 实际比较 4–14 个配置）。
+> **本项目只宣称「agent 本体会在零信号数据上报出显著」，不宣称它与模拟器某一档等价。**
+
+**一条必须一并说的机器层面条件**（第二批特有）：洁净环境自带的 `.venv` 在本机上
+**无法运行 pytest**——Smart App Control 会拦截新创建的原生扩展副本（已用实验证死）。
+这使得每次运行的「第三步自证工具链」都失败，run-04 的 agent 还因此去改环境
+（重写了 1750 个文件）。**它不影响口径 A**（MCP 工具由主仓库的 venv 运行），
+但会影响报告措辞（口径 B）。完整记录见
+[`docs/evidence/act4-20261004/conditions-log.md`](docs/evidence/act4-20261004/conditions-log.md)。
+
+> 逐次明细：批1 [`summary.md`](docs/evidence/act4-20261003/summary.md)（台账
+> [`README.md`](docs/evidence/act4-20261003/README.md)）·
+> 批2 [`summary.md`](docs/evidence/act4-20261004/summary.md)（含**预注册**
+> [`prereg.md`](docs/evidence/act4-20261004/prereg.md)、台账
+> [`README.md`](docs/evidence/act4-20261004/README.md)、运行期机器条件
+> [`conditions-log.md`](docs/evidence/act4-20261004/conditions-log.md)）。
 > 运行方法见 [`docs/runbook-act4.md`](docs/runbook-act4.md)。
 
 ## 文档地图
@@ -366,21 +427,23 @@ agent 本体规模的参照——即便只搜 4 个配置，虚报率也已从�
 
 | 你是 | 读什么 | 说明 |
 |---|---|---|
-| **评审 / 评委** | [`docs/showcase.html`](docs/showcase.html)（**一页看全**：四幕叙事 + 图表） → 本页「引子 · 四幕主线」 → `docs/report.md`（第一、二幕分析结果） → `docs/zero-signal.md`（第三幕流程审计 §1–§9 + 第四幕直测 §10） → `docs/evidence/` → `docs/team_declaration.md` | 先打开展示页一页建立全貌（含预算曲线、第四幕逐次 p 值点图），再看本页四幕主线，再读第一、二幕分析结果（六部分、数字可追溯），再读第三幕流程审计（0.525）与第四幕直测（0.20），再翻运行证据产物，最后看分工与独立完成声明。**想逐档核查数字**可打开 `docs/audit.html`（交互审计页） |
-| **想复现这个作品** | `README.md` 快速开始 → `docs/agh_setup.md` → `docs/evidence-guide.md` | 接入 AGH + MCP，按证据规范跑一遍闭环 |
-| **想从头到尾完整跑一遍** | `docs/runbook-three-acts.md`（第一至三幕）+ `docs/runbook-act4.md`（第四幕） | 逐条可粘贴的提示词（P0 自检 → 第一幕 → 第二幕 → 第三幕 → 收尾；P4x 第四幕）+ 预期时长 + 故障处置 |
-| **了解提交要求** | `docs/submission.md` → `docs/evidence-guide.md` | 提交材料清单 + 证据收集规范 |
-| **录演示视频** | `docs/demo_script.md`（**四幕版**分镜与口播稿）+ `docs/runbook-three-acts.md` / `docs/runbook-act4.md`（实际跑法） | 分镜 + 口播 + 录前自检 |
-| **背景资料（赛事）** | `references/` | 参赛指南、通知、快捷方式（非项目代码） |
-| **决赛（仅入围）** | `docs/finals.md` | 决赛路演材料要求 |
+| **评审 / 评委** | [`docs/showcase.html`](docs/showcase.html)（**一页看全**：四幕叙事 + 图表） → 本页「引子 · 四幕主线」 → [`docs/report.md`](docs/report.md)（第一、二幕分析结果） → [`docs/zero-signal.md`](docs/zero-signal.md)（第三幕流程审计 §1–§9 + 第四幕直测 §10） → [`docs/evidence/`](docs/evidence/) → [`docs/team_declaration.md`](docs/team_declaration.md) | 先打开展示页一页建立全貌（含预算曲线、第四幕逐次 p 值点图），再看本页四幕主线，再读第一、二幕分析结果（六部分、数字可追溯），再读第三幕流程审计（0.525）与第四幕直测（两批 0.20 / 0.40），再翻运行证据产物，最后看分工与独立完成声明。**想逐档核查数字**可打开 [`docs/audit.html`](docs/audit.html)（交互审计页） |
+| **想复现这个作品** | 本页「快速开始」 → [`docs/agh_setup.md`](docs/agh_setup.md) → [`docs/evidence-guide.md`](docs/evidence-guide.md) | 接入 AGH + MCP，按证据规范跑一遍闭环 |
+| **想从头到尾完整跑一遍** | [`docs/runbook-three-acts.md`](docs/runbook-three-acts.md)（第一至三幕）+ [`docs/runbook-act4.md`](docs/runbook-act4.md)（第四幕） | 逐条可粘贴的提示词（P0 自检 → 第一幕 → 第二幕 → 第三幕 → 收尾；P4x 第四幕）+ 预期时长 + 故障处置 |
+| **了解提交要求** | [`docs/submission.md`](docs/submission.md) → [`docs/evidence-guide.md`](docs/evidence-guide.md) | 提交材料清单 + 证据收集规范 |
+| **录演示视频** | [`docs/demo_script.md`](docs/demo_script.md)（**四幕版**分镜与口播稿）+ 两本 runbook（实际跑法） | 分镜 + 口播 + 录前自检 |
+| **背景资料（赛事）** | [`references/`](references/) | 参赛指南、通知、快捷方式（非项目代码） |
+| **决赛（仅入围）** | [`docs/finals.md`](docs/finals.md) | 决赛路演材料要求 |
 
 每份文档的角色：
+
 - [`docs/showcase.html`](docs/showcase.html) — **展示页**（自包含单文件：四幕叙事 + 图表，给评委的第一入口）
-- `docs/audit.html` — 交互审计页（固化 `eval_*` 产物数据，可逐档核查第三幕预算曲线与明细）
-- `docs/report.md` — **分析结果的主结论文档**（给评委看的结论，对应第一、二幕）
-- `docs/zero-signal.md` — **流程层审计的主结论文档**（零信号机械搜索，对应第三幕 §1–§9，已测 0.525；**第四幕直测见 §10**，已测 0.20）
-- `docs/evidence-guide.md` — 规范（告诉别人怎么收集证据）；`docs/evidence/` — 证据本身（产物）
-- `docs/submission.md` — 清单（交什么）；`docs/team_declaration.md` — 声明（谁做的）
+- [`docs/audit.html`](docs/audit.html) — 交互审计页（固化 `eval_*` 产物数据，可逐档核查第三幕预算曲线与明细）
+- [`docs/report.md`](docs/report.md) — **分析结果的主结论文档**（给评委看的结论，对应第一、二幕）
+- [`docs/zero-signal.md`](docs/zero-signal.md) — **流程层审计的主结论文档**（零信号机械搜索，对应第三幕 §1–§9；**第四幕直测见 §10**，两批）
+- [`docs/evidence-guide.md`](docs/evidence-guide.md) — 规范（告诉别人怎么收集证据）；[`docs/evidence/`](docs/evidence/) — 证据本身（产物）
+- [`docs/submission.md`](docs/submission.md) — 清单（交什么）；[`docs/team_declaration.md`](docs/team_declaration.md) — 声明（谁做的）；
+  [`LICENSE`](LICENSE) — 开源许可（MIT）
 
 ## 模型使用
 
@@ -445,16 +508,16 @@ python -m venv .venv
 # .venv/Scripts/python.exe -m pip install -r requirements.txt
 ```
 
-> **为什么有两个文件。** `requirements.txt` 全是下限写法（`mne>=1.6`、`numpy>=1.26`…），
+> **为什么有两个文件。** [`requirements.txt`](requirements.txt) 全是下限写法（`mne>=1.6`、`numpy>=1.26`…），
 > 而 `code_version()` 只哈希 `tools/` 下三个源文件，**不含任何库版本**。
-> 后果很具体：按 `requirements.txt` 重装时若拿到更新的 sklearn / scipy / mne，
+> 后果很具体：按 [`requirements.txt`](requirements.txt) 重装时若拿到更新的 sklearn / scipy / mne，
 > handle 依然「有效」（哈希不变），但算出来的数字可能已经漂移，而且**不会**触发
-> `E_HANDLE_STALE` 报警。`requirements-lock.txt` 是权威运行环境的 `pip freeze`
+> `E_HANDLE_STALE` 报警。[`requirements-lock.txt`](requirements-lock.txt) 是权威运行环境的 `pip freeze`
 > 精确快照（生成日期与代码版本写在文件头），补的正是这一环。
 
 ### 3. 跑测试（不联网，秒级）
 
-三类测试样例对应参赛指南 §7 的硬要求（实测 **66 passed**）：
+三类测试样例对应参赛指南 §7 的硬要求（实测 **73 passed**）：
 
 ```bash
 .venv/Scripts/python.exe -m pytest tests/ -q
@@ -494,13 +557,13 @@ dir $env:USERPROFILE\mne_data\EEGBCI\MNE-eegbci-data\files\eegmmidb\1.0.0\ -Recu
 ```
 
 在 AGH 的 **Skills** 页刷新本项目工作区、审核并启用 **`eeg-analysis`**
-（详见 `docs/agh_setup.md` §4），新建会话时**工作目录必须选 `D:\暂存\source`**。
+（详见 [`docs/agh_setup.md`](docs/agh_setup.md) §4），新建会话时**工作目录必须选 `D:\暂存\source`**。
 然后贴 **P0**（自检清单）→ 等它汇报 → 贴 **P1**（完整分析）。
 
 P1 的要点（提示词全文见 runbook）：先用 `todo` 规划 → 质量诊断驱动预处理（不套固定参数）
 → 每调一次配置汇报「观察→决定→理由→下一步」→ `within_subject` / `cross_subject`
 两协议都跑 → 置换检验（次数不足时按 skill 分批再合并）→ 与冻结基线对比 → pytest 自证
-→ 写中文报告到 `docs/report.md`（六个部分，每个数字可追溯到 `eval_*` handle）。
+→ 写中文报告到 [`docs/report.md`](docs/report.md)（六个部分，每个数字可追溯到 `eval_*` handle）。
 
 > 异常分支（专门拍「自愈」）：跑完 P1 后贴一句
 > `请查看一下 eval_000000000000 这个结果的详细内容`，
@@ -510,7 +573,7 @@ P1 的要点（提示词全文见 runbook）：先用 `todo` 规划 → 质量�
 
 **同一会话**里切换角色，贴 **P2**：让它当审计员，逐条列出第一幕实际比较过的配置
 与对应 `eval_*` handle，承认 `p` 值**未做选择校正**，并用一句话回答引子里的问题。
-预期 1–2 分钟（纯推理，无重计算）。**不要**让它改 `docs/report.md`——这是审计，不是重写。
+预期 1–2 分钟（纯推理，无重计算）。**不要**让它改 [`docs/report.md`](docs/report.md)——这是审计，不是重写。
 
 ### 8. 第三幕 · 定量：零信号试验台（P3a → P3d → P4）
 
@@ -530,13 +593,13 @@ P1 的要点（提示词全文见 runbook）：先用 `todo` 规划 → 质量�
 （用 `eeg_artifacts` 找回，**不要**手工造孪生体——`eeg_trial_run` 会按 seed 自己造）。
 
 预期结果：`budget = 1 / 4 / 24` 三档虚报率 **0.10 → 0.20 → 0.525**（单调上升），
-budget=24 的 hill 与 random 两臂无可辨别差别。P4 把结果表写进
+budget=24 的 hill 与 random 两臂**未检出**差别（检定力不足）。P4 把结果表写进
 `docs/evidence/run-<日期>/summary.md`，**不要**改 `README.md` / `docs/*.md`（由你统一回填）。
 
 ### 9. 第四幕 · 结案：直测层（洁净环境，N 次循环）
 
 第四幕**不能用主仓库跑**——主仓库的环境自己把实验说了出来（工具列表有试验台工具、
-`eeg-analysis` 技能依据段写着 0.525、还有 `docs/zero-signal.md` 与 git 历史）。
+`eeg-analysis` 技能依据段写着 0.525、还有 [`docs/zero-signal.md`](docs/zero-signal.md) 与 git 历史）。
 所以要 `git archive bbee051` 回到第一幕开跑前的洁净工作树，再逐次跑 N = 10 次。
 **完整步骤见 [`docs/runbook-act4.md`](docs/runbook-act4.md)**，主干如下：
 
@@ -564,9 +627,13 @@ Move-Item "$env:LOCALAPPDATA\eeg-agent\testbed\manifest.jsonl" "$env:LOCALAPPDAT
 > 且 `mcp tools eeg-agent` 必须是 **10** 个工具——否则本次作废（run-01 就是这样废的）。
 
 跑完 10 次：`act4_prepare.py --collect 10` 收尾 → 判分
-`scripts\act4_grade.py --evidence-dir docs\evidence\act4-<日期>`（不读报告措辞，
-回产物读 p）→ **换回主仓库工作区与 MCP、把默认台账挪回**。
-预期结果：agent 本体虚报率 **0.20**（2/10），与第三幕 budget=4 档吻合——「真闭合」成立。
+`scripts\act4_grade.py --evidence-dir docs\evidence\act4-<日期>`（p 一律**回产物**读，
+不读报告措辞；三个口径分开报；见 [`scripts/act4_grade.py`](scripts/act4_grade.py)）
+→ **换回主仓库工作区与 MCP、把默认台账挪回**。
+预期结果：宽口径约 **0.2–0.4**、严格同口径（被试内）约 **0.1–0.3**——
+两批实测见 [`act4-20261003/summary.md`](docs/evidence/act4-20261003/summary.md) 与
+[`act4-20261004/summary.md`](docs/evidence/act4-20261004/summary.md)。
+**N=10 只能定方向**，两个数都不足以与第三幕某一档「对上」——见本节上面的说明。
 
 ### 10. 复现校验：把你的数字对上文档
 
@@ -580,71 +647,79 @@ grep -rnE "0\.[6-9][0-9]|accuracy *= *[0-9]" docs/ README.md
 - **内容寻址**：同一 `(代码版本, 操作, 上游 handle, 参数, 数据指纹)` 必得同一 handle。
   跑 P0 时若 `raw_057280305171` 对不上，说明数据或代码版本已变，**立刻停下**。
 - **逐档核对**：打开 [`docs/audit.html`](docs/audit.html) 可交互核查第三幕预算曲线与逐条明细。
-- **复现台账**：`docs/evidence/run-20261002/`（三幕权威运行）、`run-20261003/`（第三幕
-  无人值守复现，80/80 零超时）、`act4-20261003/`（第四幕 N=10 逐次明细）。
+- **复现台账**：[`docs/evidence/run-20261002/`](docs/evidence/run-20261002/)（三幕权威运行）·
+  [`run-20261003/`](docs/evidence/run-20261003/)（第三幕无人值守复现，80/80 零超时）·
+  [`act4-20261003/`](docs/evidence/act4-20261003/)（第四幕第一批 N=10）·
+  [`act4-20261004/`](docs/evidence/act4-20261004/)（第四幕第二批 N=10，含预注册与运行期条件记录）。
+- **两批并列核对**：第四幕两批用的是**同一批孪生体**，按孪生体对齐的对照表在
+  [`act4-20261004/summary.md` §3](docs/evidence/act4-20261004/summary.md)。
 
 ## 目录结构
 
 ```
 eeg-agent/
-├── README.md
+├── README.md                     # 本页
+├── LICENSE                       # MIT（含第三方素材的许可分列）
 ├── requirements.txt              # 运行期依赖（下限写法）
 ├── requirements-lock.txt         # 精确版本快照（pip freeze；复现数字用这个）
 ├── requirements-dev.txt          # 开发/静态检查依赖（ruff；参赛提交可不装）
 ├── pyproject.toml                # ruff 配置
+├── .env.example                  # 环境变量示例（AGNES_* 由 AGH 侧用，本项目代码不读）
 ├── .agh/skills/
 │   ├── eeg-analysis/
-│   │   └── SKILL.md            # 常规分析任务的方法
+│   │   └── SKILL.md              # 常规分析任务的方法（含铁律 5）
 │   └── honest-lie/
-│       └── SKILL.md            # 零信号对照实验的方法（只给实验员用）
+│       └── SKILL.md              # 零信号对照实验的方法（只给实验员用）
 ├── tools/
-│   ├── eeg_mcp_server.py       # MCP server 入口（13 个工具）
-│   ├── eeg_testbed.py          # 零信号试验台（孪生体、搜索、虚报率）
-│   ├── eeg_pipeline.py         # 分析原子能力
-│   ├── eeg_dataset.py          # EEGMMIDB 加载与事件切分
-│   └── eeg_cache.py            # 产物存储（recipe 寻址 + 执行记录）
+│   ├── eeg_mcp_server.py         # MCP server 入口（13 个工具）
+│   ├── eeg_testbed.py            # 零信号试验台（孪生体、搜索、虚报率）
+│   ├── eeg_pipeline.py           # 分析原子能力
+│   ├── eeg_dataset.py            # EEGMMIDB 加载与事件切分
+│   └── eeg_cache.py              # 产物存储（recipe 寻址 + 执行记录）
 ├── scripts/
-│   ├── check_blinding.py       # 盲性验收（产物面，17 项；实验有效性闸门）
-│   ├── check_blinding_act4.py  # 盲性验收（第四幕环境面：工具数/泄漏词/handle）
-│   ├── act4_make_env.py        # 第四幕洁净运行环境构建（git archive 第一幕提交）
-│   ├── act4_prepare.py         # 第四幕逐次造孪生体 + 产物根指针 + 提示词
-│   ├── act4_grade.py           # 第四幕判分（抓 handle → 回产物读 p → 虚报率）
-│   ├── act4_mcp_shim.py        # 第四幕「换文件」切 MCP（不改 AGH 注册）
-│   ├── check_mcp_stdio.py      # MCP stdio 连通性自检
-│   ├── export_session.py       # 导出 AGH 会话
-│   ├── summarize_session.py    # 汇总会话
-│   └── verify_real_data.py     # 真实数据校验
+│   ├── check_blinding.py         # 盲性验收（产物面，17 项；实验有效性闸门）
+│   ├── check_blinding_act4.py    # 盲性验收（环境面：工具数/外来文件/泄漏词/handle/会话键）
+│   ├── act4_make_env.py          # 第四幕洁净运行环境构建（git archive 第一幕提交）
+│   ├── act4_prepare.py           # 第四幕逐次造孪生体 + 产物根指针 + 提示词
+│   ├── act4_grade.py             # 第四幕判分（三口径；p 一律回产物读）
+│   ├── act4_mcp_shim.py          # 第四幕「换文件」切 MCP（不改 AGH 注册）
+│   ├── check_mcp_stdio.py        # MCP stdio 连通性自检
+│   ├── export_session.py         # 导出 AGH 会话
+│   ├── summarize_session.py      # 汇总会话
+│   └── verify_real_data.py       # 真实数据校验
 ├── tests/
-│   ├── test_normal.py          # 正常样例
-│   ├── test_edge.py            # 边界样例
-│   ├── test_failure.py         # 失败样例
-│   ├── test_testbed.py         # 零信号试验台（含盲性回归测试）
-│   └── test_act4_grading.py    # 第四幕判分器（各条判定路径 + 边界情形）
+│   ├── test_normal.py            # 正常样例
+│   ├── test_edge.py              # 边界样例
+│   ├── test_failure.py           # 失败样例
+│   ├── test_testbed.py           # 零信号试验台（含盲性回归 + 试验台版本闸门）
+│   ├── test_act4_grading.py      # 第四幕判分器（各条判定路径 + 边界情形）
+│   └── test_blinding_act4.py     # 环境面闸门（会话键中性/唯一）
 ├── docs/
-│   ├── agh_setup.md            # AGH 接入配置
-│   ├── runbook-three-acts.md   # 三幕完整运行手册（P0–P4 提示词 + 时长 + 故障处置）
-│   ├── runbook-act4.md         # 第四幕运行手册（洁净环境 + 盲性闸门 + 判分口径）
-│   ├── demo_script.md          # 演示视频分镜（四幕版）+ 口播稿
-│   ├── evidence-guide.md       # 运行证据收集规范（文档）
-│   ├── evidence/               # 运行证据产物（数据）
+│   ├── agh_setup.md              # AGH 接入配置
+│   ├── runbook-three-acts.md     # 三幕完整运行手册（P0–P4 提示词 + 时长 + 故障处置）
+│   ├── runbook-act4.md           # 第四幕运行手册（洁净环境 + 盲性闸门 + 判分口径）
+│   ├── demo_script.md            # 演示视频分镜（四幕版）+ 口播稿
+│   ├── evidence-guide.md         # 运行证据收集规范（文档）
+│   ├── evidence/                 # 运行证据产物（数据）
 │   │   ├── agh-session-trace.md          # 人类可读调用轨迹
 │   │   ├── agh-session.jsonl             # 本次三幕运行会话（fork，已脱敏）
 │   │   ├── agh-session-act1-20261001.jsonl # 父会话（上一次第一幕，已脱敏）
 │   │   ├── run-20261002/                 # 三幕权威运行台账（README）+ 数字汇总（summary）
 │   │   ├── run-20261003/                 # 第三幕无人值守复现台账（SDK 跑 P3b/P3c/P3d，逐 handle 复得四档）
-│   │   ├── act4-20261003/                # 第四幕直测层（N=10）：台账 + 结果表 + 逐次报告
+│   │   ├── act4-20261003/                # 第四幕直测第一批（N=10）：台账 + 结果表 + 逐次报告
+│   │   ├── act4-20261004/                # 第四幕直测第二批（N=10，含预注册 + 运行期条件记录）
 │   │   ├── full/                         # 未脱敏完整诊断包（.gitignore 排除）
 │   │   └── tests-*.txt                   # 测试输出（正常/边界/失败/汇总）
 │   ├── figures/
 │   │   └── zero-signal-budget-curve.svg  # 第三幕预算曲线图（zero-signal.md §9 插图）
-│   ├── report.md               # 分析结果报告（六部分，第一、二幕）
-│   ├── zero-signal.md          # 零信号对照报告（第三幕 §1–§9 + 第四幕 §10）
-│   ├── showcase.html           # 展示页（自包含单文件：四幕叙事 + 图表，评委第一入口）
-│   ├── audit.html              # 交互审计页（固化 eval_* 产物数据，可逐档核查）
-│   ├── submission.md           # 提交材料清单
-│   ├── finals.md               # 决赛材料（仅决赛队伍）
-│   └── team_declaration.md     # 分工与独立完成声明
-└── references/                 # 赛事参考材料（非项目代码）
+│   ├── report.md                 # 分析结果报告（六部分，第一、二幕）
+│   ├── zero-signal.md            # 零信号对照报告（第三幕 §1–§9 + 第四幕 §10）
+│   ├── showcase.html             # 展示页（自包含单文件：四幕叙事 + 图表，评委第一入口）
+│   ├── audit.html                # 交互审计页（固化 eval_* 产物数据，可逐档核查）
+│   ├── submission.md             # 提交材料清单
+│   ├── finals.md                 # 决赛材料（仅决赛队伍）
+│   └── team_declaration.md       # 分工与独立完成声明
+└── references/                   # 赛事参考材料（非项目代码）
     ├── 2026年江苏省…参赛指南.md
     ├── 关于举办…通知-260928.pdf
     └── hackathon.url
@@ -654,8 +729,8 @@ eeg-agent/
 
 | 素材 | 来源 | 许可 |
 |---|---|---|
-| EEGMMIDB v1.0.0 | https://physionet.org/content/eegmmidb/1.0.0/ | ODC-BY 1.0 |
-| Agnes Harness | https://github.com/AgnesAI-Labs/agnes-harness | 见其仓库 |
+| EEGMMIDB v1.0.0 | [physionet.org/content/eegmmidb/1.0.0](https://physionet.org/content/eegmmidb/1.0.0/) | ODC-BY 1.0 |
+| Agnes Harness | [AgnesAI-Labs/agnes-harness](https://github.com/AgnesAI-Labs/agnes-harness) | 见其仓库 |
 | MNE-Python / scikit-learn / scipy / numpy | PyPI | BSD |
 
 原始数据不随仓库分发，由 `mne.datasets.eegbci` 按需下载。
@@ -664,13 +739,23 @@ eeg-agent/
 
 分两层：
 
-- **环境层**：用 `requirements-lock.txt`（`pip freeze` 精确版本）安装，而不是下限写法的
-  `requirements.txt`。原因见「快速开始 · 第 2 步」：`code_version()` 只哈希三个源文件、
+- **环境层**：用 [`requirements-lock.txt`](requirements-lock.txt)（`pip freeze` 精确版本）安装，而不是下限写法的
+  [`requirements.txt`](requirements.txt)。原因见「快速开始 · 第 2 步」：`code_version()` 只哈希三个源文件、
   **不含库版本**，换库版本会让 handle 保持不变而数字漂移，且不触发 `E_HANDLE_STALE`。
-- **数字层**：见 `docs/evidence-guide.md`——那里记录了每一层的验证方式与需要留存的实际输出。
-  三份可核对的台账：`docs/evidence/run-20261002/`（三幕权威运行）、`run-20261003/`
-  （第三幕无人值守复现）、`act4-20261003/`（第四幕直测 N=10）。
+- **数字层**：见 [`docs/evidence-guide.md`](docs/evidence-guide.md)——那里记录了每一层的验证方式与需要留存的实际输出。
+  可核对的台账：[`run-20261002/`](docs/evidence/run-20261002/)（三幕权威运行）·
+  [`run-20261003/`](docs/evidence/run-20261003/)（第三幕无人值守复现）·
+  [`act4-20261003/`](docs/evidence/act4-20261003/)（第四幕第一批 N=10）·
+  [`act4-20261004/`](docs/evidence/act4-20261004/)（第四幕第二批 N=10，修掉会话键泄漏后重跑）。
+
+> ⚠️ **一处已知的存储性质，读证据时要知道**：产物是**内容寻址**的——handle、meta、
+> 数组数据都由配方决定，永不变。但那条 `.json` 记录里的 `created_utc` 是**写入时间**，
+> 不是创建时间：重复执行同一配方会命中同一 handle，同时把该记录重写一遍
+> （`created_utc` 更新、`index.jsonl` 再追加一行）。**数字不受影响**，但任何
+> 「按时间分组」的分析都是脆的。第四幕第一批就踩过这个坑：同一组参数在改动过的
+> 试验台代码下产出了两批数字，只能靠日期把它们分开（见 [`docs/zero-signal.md`](docs/zero-signal.md) §3）。
 
 ## 许可
 
-MIT © 2026 EEG Agent Team
+MIT © 2026 EEG Agent Team —— 见 [`LICENSE`](LICENSE)。
+第三方素材与数据各自遵循其原始许可（EEGMMIDB 为 ODC-BY 1.0，不随仓库分发）。

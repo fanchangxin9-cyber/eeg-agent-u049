@@ -51,7 +51,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -114,13 +114,49 @@ def _git_archive(commit: str) -> bytes:
     return proc.stdout
 
 
+def _reject_unsafe_members(tf: tarfile.TarFile) -> None:
+    """拒绝**越界路径**与**非常规成员**——在两种解包路径之前都跑一遍（SEC-009）。
+
+    为什么不能只靠 `filter="data"`：它是 **Python 3.12+** 才有的参数。
+    本项目 `pyproject.toml` 标的是 `py310`，所以在 3.10 / 3.11 上会走
+    `except TypeError` 分支，而那个分支**此前没有任何过滤**——
+    绝对路径、`..` 穿越、设备文件全都放行。
+
+    本检查不依赖解释器版本，因此两条分支都受保护。
+
+    （实际不可利用：tarball 来自本仓库自己的 `git archive`，不是外部输入。
+    但「依赖外部输入不可控」才能安全的事，不该建立在调用方守规矩上。）
+    """
+    for m in tf.getmembers():
+        # tar 规范用 `/` 分隔，但恶意档可以用 `\`；Windows 上 `\` 同样是分隔符
+        p = PurePosixPath(m.name.replace("\\", "/"))
+        if p.is_absolute() or any(part == ".." for part in p.parts):
+            raise BuildError(f"tar 里有越界路径 {m.name!r}，拒绝解包。")
+        if not (m.isfile() or m.isdir()):
+            raise BuildError(
+                f"tar 里有非常规成员（类型 {m.type!r}）：{m.name!r}，拒绝解包。"
+            )
+
+
 def _extract(tar_bytes: bytes, dest: Path) -> None:
     with tarfile.open(fileobj=io.BytesIO(tar_bytes)) as tf:
-        # filter="data" 会挡掉绝对路径 / .. / 设备文件等（3.12+）
+        _reject_unsafe_members(tf)          # 先查：老 Python 的分支也受保护
         try:
+            # filter="data" 会挡掉绝对路径 / .. / 设备文件等（3.12+）
             tf.extractall(dest, filter="data")
-        except TypeError:  # 老 Python 没有 filter 参数
+        except TypeError:  # 老 Python 没有 filter 参数——上面的检查已兜住
             tf.extractall(dest)
+
+
+def archive_file_names(commit: str = ACT1_COMMIT) -> set[str]:
+    """该提交里所有文件的相对路径（正斜杠）。
+
+    「洁净环境里不许有外来文件」这条不变量的**唯一真相**：一个正确构建的
+    环境，除去 `ACT1_OUTPUTS` 与运行期写入的 `artifact_root.txt`、`.venv`，
+    文件集合必须与这里逐名相同。
+    """
+    with tarfile.open(fileobj=io.BytesIO(_git_archive(commit))) as tf:
+        return {m.name for m in tf.getmembers() if m.isfile()}
 
 
 def _strip_act1_outputs(dest: Path) -> list[str]:
