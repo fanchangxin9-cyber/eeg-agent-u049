@@ -132,6 +132,34 @@ a:hover{color:var(--page-brand-hover);border-bottom-color:var(--page-brand-hover
 .intro-hook p{margin:0 0 8px;font-size:clamp(.98rem,2.1vw,1.12rem);line-height:1.7}
 .intro-hook p:last-child{margin-bottom:0}
 .intro-hook strong{color:var(--page-brand-text);font-weight:700}
+
+/* ============ 30s pitch card ============ */
+.intro-pitch{
+  position:relative;
+  background:var(--page-brand);
+  color:#FFF7F0;
+  border-radius:var(--radius-lg);
+  padding:22px 24px 20px;
+  margin:0 0 28px;
+  max-width:60ch;
+  box-shadow:0 2px 8px rgba(122,53,16,.18);
+}
+.intro-pitch__tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.85;margin:0 0 10px;
+}
+.intro-pitch__tag::before{content:"";width:7px;height:7px;border-radius:50%;background:#FFD9A8;display:inline-block}
+.intro-pitch__line{
+  font-size:clamp(1.05rem,2.4vw,1.28rem);line-height:1.5;font-weight:600;margin:0 0 6px;
+}
+.intro-pitch__line em{font-style:normal;color:#FFD9A8;font-weight:800}
+.intro-pitch__sub{
+  font-size:13.5px;line-height:1.65;margin:8px 0 0;opacity:.92;
+  border-top:1px solid rgba(255,217,168,.3);padding-top:10px;
+}
+.intro-pitch__sub b{color:#FFD9A8;font-weight:700}
+
 .intro-summary{
   font-size:15px;line-height:1.8;color:var(--page-text-secondary);
   max-width:64ch;margin:0 0 30px;
@@ -788,6 +816,18 @@ footer::before{
         <div class="intro-hook">
           <p><strong>一份分析报告，每个数字都能在磁盘上找到出处——没有一个是编的。</strong></p>
           <p>可它报出的那个「显著」，<strong>可能完全是它自己挑出来的。</strong></p>
+        </div>
+
+        <div class="intro-pitch" role="region" aria-label="30 秒电梯演讲">
+          <p class="intro-pitch__tag">30 秒读懂这个项目</p>
+          <p class="intro-pitch__line">
+            我们不测<em>准确率</em>。我们测的是——一个智能体"<em>先挑配置、再报 p 值</em>"这个动作，
+            能把多少<em>纯噪声</em>抬成"显著"。
+          </p>
+          <p class="intro-pitch__sub">
+            答案：零信号数据上，<b>52.5%</b> 被报成了"显著"（名义线 5%）；交给智能体本体跑，
+            <b>20% → 40%</b>。准确率在这里不是成绩，是<b>被测对象</b>。
+          </p>
         </div>
 
         <p class="intro-summary">
